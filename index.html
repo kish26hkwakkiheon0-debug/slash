@@ -50,6 +50,19 @@ html, body {
     z-index: 10;
 }
 
+/* 선 개수 */
+
+#lineCount {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+
+    color: white;
+    font-size: 20px;
+
+    z-index: 10;
+}
+
 /* 캔버스 */
 
 canvas {
@@ -145,6 +158,10 @@ canvas {
         STAGE 1
     </div>
 
+    <div id="lineCount">
+        선: 2 / 2
+    </div>
+
     <canvas id="canvas"></canvas>
 
     <div id="player"></div>
@@ -177,6 +194,12 @@ const player =
 const slashButton =
     document.getElementById("slashButton");
 
+const stageText =
+    document.getElementById("stage");
+
+const lineCountText =
+    document.getElementById("lineCount");
+
 
 // ==================================
 // 게임 변수
@@ -198,6 +221,11 @@ let playerPos = {
 let enemies = [];
 
 
+// 현재 스테이지의 최대 선 개수
+
+let maxLines = 2;
+
+
 // 그어진 선
 
 let lines = [];
@@ -213,7 +241,7 @@ let currentLine = null;
 let dragging = false;
 
 
-// 현재 베기 중인지
+// 베기 중인지
 
 let attacking = false;
 
@@ -276,17 +304,49 @@ function getEnemyCount() {
     let count =
         Math.floor(stage / 5);
 
-    // 최소 1명
-
     count =
         Math.max(1, count);
-
-    // 최대 7명
 
     count =
         Math.min(7, count);
 
     return count;
+}
+
+
+// ==================================
+// 선 개수 계산
+// ==================================
+
+function updateMaxLines() {
+
+    const enemyCount =
+        getEnemyCount();
+
+    // 적 수 - 1
+    // 최소 2
+
+    maxLines =
+        Math.max(
+            2,
+            enemyCount - 1
+        );
+
+}
+
+
+// ==================================
+// 선 개수 표시
+// ==================================
+
+function updateLineCount() {
+
+    const remaining =
+        maxLines - lines.length;
+
+    lineCountText.textContent =
+        `선: ${remaining} / ${maxLines}`;
+
 }
 
 
@@ -327,8 +387,6 @@ function spawnEnemies() {
         let validPosition = false;
 
 
-        // 적 위치 랜덤 생성
-
         while (!validPosition) {
 
             x =
@@ -365,7 +423,7 @@ function spawnEnemies() {
             }
 
 
-            // 다른 적과 너무 가까운지 검사
+            // 다른 적과 너무 가까운지 확인
 
             for (
                 const other of enemies
@@ -419,7 +477,83 @@ function spawnEnemies() {
         enemies.push(enemy);
 
     }
+
 }
+
+
+// ==================================
+// 현재 적 위치 저장
+// ==================================
+//
+// 실패 시 적 위치를 유지하기 위해
+// 현재 위치를 저장해 둔다.
+//
+
+function saveEnemyPositions() {
+
+    return enemies.map(
+        enemy => {
+
+            return {
+
+                x:
+                    parseFloat(
+                        enemy.style.left
+                    ),
+
+                y:
+                    parseFloat(
+                        enemy.style.top
+                    )
+
+            };
+
+        }
+    );
+
+}
+
+
+// ==================================
+// 적 위치 그대로 복구
+// ==================================
+
+function restoreEnemies() {
+
+    enemies.forEach(
+        (enemy, index) => {
+
+            const saved =
+                savedEnemyPositions[index];
+
+            if (!saved)
+                return;
+
+
+            enemy.style.left =
+                saved.x + "px";
+
+            enemy.style.top =
+                saved.y + "px";
+
+
+            // 죽은 적도 부활
+
+            enemy.style.display =
+                "block";
+
+            enemy.style.opacity =
+                "1";
+
+        }
+    );
+
+}
+
+
+// 실패 시 사용할 적 위치
+
+let savedEnemyPositions = [];
 
 
 // ==================================
@@ -434,9 +568,11 @@ function getTouchPosition(e) {
     return {
 
         x: touch.clientX,
+
         y: touch.clientY
 
     };
+
 }
 
 
@@ -448,20 +584,31 @@ game.addEventListener(
     "touchstart",
     function(e) {
 
-        // 베기 중에는 선을 그릴 수 없음
+        // 베기 중에는 입력 불가
 
         if (attacking)
             return;
 
 
-        // 버튼을 누른 경우
+        // 베기 버튼이면 제외
 
         if (e.target === slashButton)
             return;
 
 
-        e.preventDefault();
+        // 선 개수 제한
 
+        if (
+            lines.length >=
+            maxLines
+        ) {
+
+            return;
+
+        }
+
+
+        e.preventDefault();
 
         dragging = true;
 
@@ -533,6 +680,7 @@ game.addEventListener(
         if (!dragging)
             return;
 
+
         e.preventDefault();
 
 
@@ -576,6 +724,8 @@ game.addEventListener(
 
         }
 
+
+        updateLineCount();
 
         draw();
 
@@ -627,7 +777,7 @@ function draw() {
     }
 
 
-    // 현재 선
+    // 현재 드래그 중인 선
 
     if (currentLine) {
 
@@ -646,6 +796,7 @@ function draw() {
         ctx.stroke();
 
     }
+
 }
 
 
@@ -724,6 +875,7 @@ function pointToLineDistance(
         (p.y - closest.y) ** 2
 
     );
+
 }
 
 
@@ -738,8 +890,6 @@ function checkEnemyHit(
 
     enemies.forEach(
         enemy => {
-
-            // 이미 죽은 적
 
             if (
                 enemy.style.display ===
@@ -777,13 +927,12 @@ function checkEnemyHit(
                 );
 
 
-            // 적이 선에 닿으면 처치
-
-            if (distance < 30) {
+            if (
+                distance < 30
+            ) {
 
                 enemy.style.opacity =
                     "0";
-
 
                 enemy.style.display =
                     "none";
@@ -792,11 +941,12 @@ function checkEnemyHit(
 
         }
     );
+
 }
 
 
 // ==================================
-// 베기
+// 베기 버튼
 // ==================================
 
 slashButton.addEventListener(
@@ -806,6 +956,7 @@ slashButton.addEventListener(
         if (attacking)
             return;
 
+
         if (lines.length === 0)
             return;
 
@@ -814,6 +965,13 @@ slashButton.addEventListener(
 
         slashButton.disabled =
             true;
+
+
+        // 베기 시작 전에
+        // 현재 적 배치를 저장
+
+        savedEnemyPositions =
+            saveEnemyPositions();
 
 
         moveAlongPath(0);
@@ -828,8 +986,6 @@ slashButton.addEventListener(
 
 function moveAlongPath(index) {
 
-    // 모든 선을 끝까지 이동
-
     if (
         index >=
         lines.length
@@ -841,6 +997,7 @@ function moveAlongPath(index) {
         );
 
         return;
+
     }
 
 
@@ -855,15 +1012,7 @@ function moveAlongPath(index) {
         line.end;
 
 
-    /*
-       ★ 베기 속도
-
-       선의 길이에 관계없이
-       항상 같은 시간에 이동한다.
-
-       따라서 긴 선도 매우 빠르게
-       지나간다.
-    */
+    // 매우 빠른 속도
 
     const duration = 120;
 
@@ -904,8 +1053,6 @@ function moveAlongPath(index) {
             playerPos.y + "px";
 
 
-        // 이동하면서 공격 판정
-
         checkEnemyHit(
 
             start,
@@ -942,6 +1089,7 @@ function moveAlongPath(index) {
     requestAnimationFrame(
         animate
     );
+
 }
 
 
@@ -999,43 +1147,52 @@ function finishAttack() {
         );
 
     }
+
 }
 
 
 // ==================================
-// 스테이지 재시작
+// 스테이지 실패 → 재시작
 // ==================================
 
 function restartStage() {
 
-    // 선 전부 삭제
+    // 선 삭제
 
     lines = [];
 
     currentLine = null;
 
 
-    // 플레이어 초기화
+    // 플레이어 원위치
 
     resetPlayerPosition();
 
 
-    // 새로운 적 배치
+    /*
+       ★ 중요
 
-    spawnEnemies();
+       spawnEnemies()를 호출하지 않는다.
+
+       따라서 적의 위치는 그대로 유지된다.
+    */
+
+    restoreEnemies();
 
 
-    // 캔버스 초기화
+    // 선 개수 초기화
+
+    updateLineCount();
+
 
     draw();
 
-
-    // 버튼 활성화
 
     slashButton.disabled =
         false;
 
     attacking = false;
+
 }
 
 
@@ -1048,30 +1205,35 @@ function nextStage() {
     stage++;
 
 
-    document.getElementById(
-        "stage"
-    ).textContent =
+    stageText.textContent =
         "STAGE " + stage;
 
 
-    // 플레이어 초기화
+    // 플레이어 원위치
 
     resetPlayerPosition();
 
 
-    // 선 초기화
+    // 선 삭제
 
     lines = [];
 
     currentLine = null;
 
 
-    // 새 적 생성
+    // 다음 스테이지는
+    // 새로운 적 위치 생성
 
     spawnEnemies();
 
 
-    // 화면 갱신
+    // 적 수에 맞춰
+    // 선 제한 재계산
+
+    updateMaxLines();
+
+    updateLineCount();
+
 
     draw();
 
@@ -1080,6 +1242,7 @@ function nextStage() {
         false;
 
     attacking = false;
+
 }
 
 
@@ -1088,6 +1251,10 @@ function nextStage() {
 // ==================================
 
 resize();
+
+updateMaxLines();
+
+updateLineCount();
 
 spawnEnemies();
 
