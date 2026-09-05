@@ -90,7 +90,7 @@ html, body {
 
 
 /* ==============================
-   캔버스
+   Canvas
 ================================ */
 
 canvas {
@@ -103,7 +103,9 @@ canvas {
     width: 100%;
     height: 100%;
 
-    z-index: 1;
+    z-index: 6;
+
+    pointer-events: none;
 }
 
 
@@ -126,6 +128,10 @@ canvas {
         translate(-50%, -50%);
 
     z-index: 5;
+
+    box-shadow:
+        0 0 10px white,
+        0 0 20px white;
 }
 
 
@@ -149,8 +155,12 @@ canvas {
 
     z-index: 4;
 
+    box-shadow:
+        0 0 10px #d33;
+
     transition:
-        opacity 0.12s;
+        opacity 0.08s,
+        transform 0.08s;
 }
 
 
@@ -186,14 +196,12 @@ canvas {
     z-index: 20;
 }
 
-
 #slashButton:active {
 
     transform:
         translateX(-50%)
         scale(0.95);
 }
-
 
 #slashButton:disabled {
 
@@ -287,7 +295,7 @@ let enemies = [];
 
 
 // ======================================================
-// 플레이어가 실제로 그은 선
+// 플레이어가 그은 선
 // ======================================================
 
 let lines = [];
@@ -298,30 +306,49 @@ let dragging = false;
 
 
 // ======================================================
-// 현재 공격 중인지
+// 공격 상태
 // ======================================================
 
 let attacking = false;
 
 
 // ======================================================
-// 현재 스테이지의 최대 선 개수
+// 선 제한
 // ======================================================
 
 let maxLines = 2;
 
 
 // ======================================================
-// 내부적으로만 사용하는 정답 경로
-//
-// ★ 플레이어에게는 표시하지 않는다.
+// 내부 정답 경로
 // ======================================================
 
 let solutionPath = [];
 
 
 // ======================================================
-// 적 수 계산
+// 이펙트 입자
+// ======================================================
+
+let particles = [];
+
+
+// ======================================================
+// 베기 잔상
+// ======================================================
+
+let slashTrails = [];
+
+
+// ======================================================
+// 애니메이션 루프
+// ======================================================
+
+let effectAnimationRunning = false;
+
+
+// ======================================================
+// 적 수
 // ======================================================
 
 function getEnemyCount() {
@@ -330,16 +357,12 @@ function getEnemyCount() {
         Math.floor(stage / 5);
 
 
-    // 최소 1
-
     count =
         Math.max(
             1,
             count
         );
 
-
-    // 최대 7
 
     count =
         Math.min(
@@ -353,7 +376,7 @@ function getEnemyCount() {
 
 
 // ======================================================
-// 선 개수 계산
+// 선 개수
 // ======================================================
 
 function updateMaxLines() {
@@ -361,12 +384,6 @@ function updateMaxLines() {
     const enemyCount =
         getEnemyCount();
 
-
-    /*
-        적 수 - 1
-
-        단, 최소 2개
-    */
 
     maxLines =
         Math.max(
@@ -455,7 +472,7 @@ window.addEventListener(
 
 
 // ======================================================
-// 두 점 사이 거리
+// 거리
 // ======================================================
 
 function distance(a, b) {
@@ -463,7 +480,6 @@ function distance(a, b) {
     return Math.sqrt(
 
         (a.x - b.x) ** 2 +
-
         (a.y - b.y) ** 2
 
     );
@@ -472,7 +488,7 @@ function distance(a, b) {
 
 
 // ======================================================
-// 선분 위의 특정 위치
+// 선 위의 점
 // ======================================================
 
 function pointOnLine(
@@ -505,28 +521,13 @@ function generateSolutionPath() {
     solutionPath = [];
 
 
-    /*
-        정답 경로는
-
-        플레이어
-            ↓
-        랜덤 지점
-            ↓
-        랜덤 지점
-            ↓
-        ...
-
-        형태다.
-
-        선 개수가 N개라면
-        선분도 N개 생성한다.
-    */
-
-
     let current = {
 
-        x: playerPos.x,
-        y: playerPos.y
+        x:
+            playerPos.x,
+
+        y:
+            playerPos.y
 
     };
 
@@ -540,43 +541,10 @@ function generateSolutionPath() {
         let next;
 
 
-        /*
-            마지막 선이 아니면
-            화면 위쪽 영역에 새로운
-            랜덤 지점을 만든다.
-        */
-
-        next = {
-
-            x:
-                60 +
-                Math.random()
-                * (width - 120),
-
-            y:
-                100 +
-                Math.random()
-                * (height * 0.48)
-
-        };
-
-
-        /*
-            현재 위치와 너무 가까우면
-            다시 생성
-        */
-
         let attempts = 0;
 
 
-        while (
-            distance(
-                current,
-                next
-            ) < 100
-            &&
-            attempts < 20
-        ) {
+        do {
 
             next = {
 
@@ -588,29 +556,47 @@ function generateSolutionPath() {
                 y:
                     100 +
                     Math.random()
-                    * (height * 0.48)
+                    * (height * 0.47)
 
             };
 
 
             attempts++;
 
-        }
+
+        } while (
+
+            distance(
+                current,
+                next
+            ) < 120
+
+            &&
+
+            attempts < 30
+
+        );
 
 
         solutionPath.push({
 
             start: {
 
-                x: current.x,
-                y: current.y
+                x:
+                    current.x,
+
+                y:
+                    current.y
 
             },
 
             end: {
 
-                x: next.x,
-                y: next.y
+                x:
+                    next.x,
+
+                y:
+                    next.y
 
             }
 
@@ -625,42 +611,155 @@ function generateSolutionPath() {
 
 
 // ======================================================
-// 적 생성
-//
-// ★ 정답 경로 위/근처에 적을 배치한다.
-//
-// 따라서 항상 적들을 전부 지나가는
-// 해결 가능한 경로가 존재한다.
+// 경로 전체의 길이
 // ======================================================
 
-function spawnEnemies() {
+function getPathLength() {
 
-    // 기존 적 제거
-
-    enemies.forEach(
-        enemy =>
-            enemy.remove()
-    );
+    let total = 0;
 
 
-    enemies = [];
+    for (
+        const segment of solutionPath
+    ) {
+
+        total +=
+            distance(
+                segment.start,
+                segment.end
+            );
+
+    }
 
 
-    // 정답 경로 생성
+    return total;
 
-    generateSolutionPath();
+}
 
+
+// ======================================================
+// 경로의 전체 길이 기준으로
+// 특정 거리만큼 떨어진 위치 찾기
+// ======================================================
+
+function pointAtDistanceFromPath(
+    targetDistance
+) {
+
+    let passed = 0;
+
+
+    for (
+        const segment of solutionPath
+    ) {
+
+        const segmentLength =
+            distance(
+                segment.start,
+                segment.end
+            );
+
+
+        if (
+            targetDistance <=
+            passed + segmentLength
+        ) {
+
+            const localDistance =
+                targetDistance -
+                passed;
+
+
+            const t =
+                localDistance /
+                segmentLength;
+
+
+            return pointOnLine(
+
+                segment.start,
+
+                segment.end,
+
+                t
+
+            );
+
+        }
+
+
+        passed +=
+            segmentLength;
+
+    }
+
+
+    const last =
+        solutionPath[
+            solutionPath.length - 1
+        ];
+
+
+    return {
+
+        x: last.end.x,
+
+        y: last.end.y
+
+    };
+
+}
+
+
+// ======================================================
+// 적 위치 생성
+//
+// ★ 핵심 변경 부분
+//
+// 적을 각각 랜덤한 선분에 넣는 대신
+// "전체 경로"에 균등하게 배치한다.
+//
+// 따라서 한곳에 몰릴 가능성이 크게 줄어든다.
+// ======================================================
+
+function generateEnemyPositions() {
 
     const enemyCount =
         getEnemyCount();
 
 
-    /*
-        적들을 정답 경로의
-        서로 다른 랜덤 위치에 배치한다.
+    const totalLength =
+        getPathLength();
 
-        같은 선분에 여러 적이 있어도
-        문제는 없다.
+
+    const positions = [];
+
+
+    /*
+        적 사이 최소 거리
+
+        적 크기가 약 40px이므로
+        75px 정도로 떨어뜨린다.
+    */
+
+    const minimumDistance =
+        75;
+
+
+    /*
+        적이 경로 전체에
+        골고루 퍼지도록 한다.
+
+        예:
+
+        적 4명이라면
+
+        20%
+        40%
+        60%
+        80%
+
+        근처에 배치.
     */
 
     for (
@@ -669,64 +768,66 @@ function spawnEnemies() {
         i++
     ) {
 
-        const enemy =
-            document.createElement(
-                "div"
-            );
+        /*
+            균등 위치 + 약간의 랜덤 오차
+        */
 
-
-        enemy.classList.add(
-            "enemy"
-        );
+        const baseRatio =
+            (i + 1)
+            /
+            (enemyCount + 1);
 
 
         /*
-            정답 경로 중
-            랜덤한 선분 선택
+            랜덤 오차
+
+            너무 크게 움직이면
+            적이 특정 구역으로 몰릴 수 있으므로
+            작게 유지한다.
         */
 
-        const segmentIndex =
-            Math.floor(
-                Math.random()
-                * solutionPath.length
+        const jitter =
+            (
+                Math.random() - 0.5
+            )
+            *
+            Math.min(
+                0.10,
+                0.6 / enemyCount
             );
 
 
-        const segment =
-            solutionPath[
-                segmentIndex
-            ];
+        let ratio =
+            baseRatio + jitter;
 
 
-        /*
-            선분의 시작/끝 부분은
-            피해서 배치한다.
+        ratio =
+            Math.max(
+                0.08,
+                Math.min(
+                    0.92,
+                    ratio
+                )
+            );
 
-            그래야 적이 선분 끝에
-            걸쳐 이상하게 생성되는 것을 방지.
-        */
 
-        const t =
-            0.15 +
-            Math.random() * 0.70;
+        const targetDistance =
+            totalLength * ratio;
 
 
         const base =
-            pointOnLine(
-                segment.start,
-                segment.end,
-                t
+            pointAtDistanceFromPath(
+                targetDistance
             );
 
 
         /*
-            정답선에서 약간 떨어뜨린다.
+            정답선에서 살짝 벗어나게 한다.
 
-            최대 약 15px.
+            최대 14px.
 
-            현재 공격 판정이 30px이므로
-            정답 경로를 정확하게 따라가면
-            충분히 맞는다.
+            공격 판정은 30px이므로
+            여전히 충분히 맞출 수 있다.
         */
 
         const angle =
@@ -737,39 +838,197 @@ function spawnEnemies() {
 
         const offset =
             Math.random()
-            * 15;
+            * 14;
 
 
-        const x =
-            base.x +
-            Math.cos(angle)
-            * offset;
+        const position = {
+
+            x:
+                base.x +
+                Math.cos(angle)
+                * offset,
+
+            y:
+                base.y +
+                Math.sin(angle)
+                * offset
+
+        };
 
 
-        const y =
-            base.y +
-            Math.sin(angle)
-            * offset;
-
-
-        enemy.style.left =
-            x + "px";
-
-
-        enemy.style.top =
-            y + "px";
-
-
-        game.appendChild(
-            enemy
-        );
-
-
-        enemies.push(
-            enemy
+        positions.push(
+            position
         );
 
     }
+
+
+    /*
+        혹시라도 경로 자체가 서로 가까이
+        지나가는 경우까지 검사한다.
+    */
+
+    for (
+        let i = 0;
+        i < positions.length;
+        i++
+    ) {
+
+        for (
+            let j = i + 1;
+            j < positions.length;
+            j++
+        ) {
+
+            if (
+                distance(
+                    positions[i],
+                    positions[j]
+                )
+                <
+                minimumDistance
+            ) {
+
+                return null;
+
+            }
+
+        }
+
+    }
+
+
+    return positions;
+
+}
+
+
+// ======================================================
+// 적 생성
+//
+// 위치가 좋지 않으면
+// 정답 경로부터 다시 생성한다.
+// ======================================================
+
+function spawnEnemies() {
+
+    /*
+        기존 적 제거
+    */
+
+    enemies.forEach(
+        enemy =>
+            enemy.remove()
+    );
+
+
+    enemies = [];
+
+
+    let positions = null;
+
+
+    /*
+        적들이 충분히 떨어질 때까지
+        새로운 경로를 생성한다.
+    */
+
+    let attempts = 0;
+
+
+    while (
+        positions === null &&
+        attempts < 100
+    ) {
+
+        generateSolutionPath();
+
+
+        positions =
+            generateEnemyPositions();
+
+
+        attempts++;
+
+    }
+
+
+    /*
+        혹시 100번 안에 성공하지 못했다면
+        현재 경로를 그대로 사용한다.
+    */
+
+    if (positions === null) {
+
+        positions =
+            [];
+
+
+        for (
+            let i = 0;
+            i < getEnemyCount();
+            i++
+        ) {
+
+            const segment =
+                solutionPath[
+                    i %
+                    solutionPath.length
+                ];
+
+
+            positions.push(
+
+                pointOnLine(
+                    segment.start,
+                    segment.end,
+                    0.5
+                )
+
+            );
+
+        }
+
+    }
+
+
+    /*
+        적 DOM 생성
+    */
+
+    positions.forEach(
+        position => {
+
+            const enemy =
+                document.createElement(
+                    "div"
+                );
+
+
+            enemy.classList.add(
+                "enemy"
+            );
+
+
+            enemy.style.left =
+                position.x + "px";
+
+
+            enemy.style.top =
+                position.y + "px";
+
+
+            game.appendChild(
+                enemy
+            );
+
+
+            enemies.push(
+                enemy
+            );
+
+        }
+    );
 
 }
 
@@ -786,9 +1045,11 @@ function getTouchPosition(e) {
 
     return {
 
-        x: touch.clientX,
+        x:
+            touch.clientX,
 
-        y: touch.clientY
+        y:
+            touch.clientY
 
     };
 
@@ -803,18 +1064,9 @@ game.addEventListener(
     "touchstart",
     function(e) {
 
-        /*
-            공격 중에는
-            선을 그릴 수 없다.
-        */
-
         if (attacking)
             return;
 
-
-        /*
-            베기 버튼을 누른 경우
-        */
 
         if (
             e.target ===
@@ -823,18 +1075,11 @@ game.addEventListener(
             return;
 
 
-        /*
-            선 개수 제한
-        */
-
         if (
             lines.length >=
             maxLines
-        ) {
-
+        )
             return;
-
-        }
 
 
         e.preventDefault();
@@ -850,33 +1095,21 @@ game.addEventListener(
         let start;
 
 
-        /*
-            첫 번째 선
-
-            플레이어 → 손가락
-        */
-
         if (
             lines.length === 0
         ) {
 
             start = {
 
-                x: playerPos.x,
+                x:
+                    playerPos.x,
 
-                y: playerPos.y
+                y:
+                    playerPos.y
 
             };
 
         }
-
-
-        /*
-            두 번째 선부터
-
-            이전 선의 끝 →
-            새로운 손가락 위치
-        */
 
         else {
 
@@ -966,11 +1199,6 @@ game.addEventListener(
 
         if (currentLine) {
 
-            /*
-                아주 짧은 선도
-                일단 하나의 선으로 인정
-            */
-
             lines.push(
                 currentLine
             );
@@ -992,10 +1220,262 @@ game.addEventListener(
 
 
 // ======================================================
-// 화면에 선 그리기
+// 적 폭발 이펙트
 // ======================================================
 
-function draw() {
+function createEnemyExplosion(
+    x,
+    y
+) {
+
+    /*
+        중앙 섬광
+    */
+
+    particles.push({
+
+        x: x,
+        y: y,
+
+        vx: 0,
+        vy: 0,
+
+        life: 18,
+        maxLife: 18,
+
+        size: 22,
+
+        type: "flash"
+
+    });
+
+
+    /*
+        바깥쪽으로 튀는 파편
+    */
+
+    for (
+        let i = 0;
+        i < 18;
+        i++
+    ) {
+
+        const angle =
+            Math.random()
+            * Math.PI
+            * 2;
+
+
+        const speed =
+            2 +
+            Math.random() * 5;
+
+
+        particles.push({
+
+            x: x,
+
+            y: y,
+
+            vx:
+                Math.cos(angle)
+                * speed,
+
+            vy:
+                Math.sin(angle)
+                * speed,
+
+            life:
+                25 +
+                Math.random() * 20,
+
+            maxLife: 45,
+
+            size:
+                2 +
+                Math.random() * 5,
+
+            type: "fragment"
+
+        });
+
+    }
+
+
+    /*
+        작은 빛 입자
+    */
+
+    for (
+        let i = 0;
+        i < 15;
+        i++
+    ) {
+
+        const angle =
+            Math.random()
+            * Math.PI
+            * 2;
+
+
+        const speed =
+            1 +
+            Math.random() * 3;
+
+
+        particles.push({
+
+            x: x,
+
+            y: y,
+
+            vx:
+                Math.cos(angle)
+                * speed,
+
+            vy:
+                Math.sin(angle)
+                * speed,
+
+            life:
+                20 +
+                Math.random() * 20,
+
+            maxLife: 40,
+
+            size:
+                1 +
+                Math.random() * 3,
+
+            type: "spark"
+
+        });
+
+    }
+
+
+    startEffectAnimation();
+
+}
+
+
+// ======================================================
+// 베기 잔상 생성
+// ======================================================
+
+function createSlashTrail(
+    x,
+    y,
+    angle
+) {
+
+    slashTrails.push({
+
+        x: x,
+
+        y: y,
+
+        angle: angle,
+
+        life: 10,
+
+        maxLife: 10
+
+    });
+
+
+    /*
+        베기 주변의 작은 입자
+    */
+
+    for (
+        let i = 0;
+        i < 2;
+        i++
+    ) {
+
+        particles.push({
+
+            x:
+                x +
+                (
+                    Math.random()
+                    - 0.5
+                ) * 20,
+
+            y:
+                y +
+                (
+                    Math.random()
+                    - 0.5
+                ) * 20,
+
+            vx:
+                (
+                    Math.random()
+                    - 0.5
+                ) * 2,
+
+            vy:
+                (
+                    Math.random()
+                    - 0.5
+                ) * 2,
+
+            life: 12,
+
+            maxLife: 12,
+
+            size: 2,
+
+            type: "slash"
+
+        });
+
+    }
+
+
+    startEffectAnimation();
+
+}
+
+
+// ======================================================
+// 이펙트 애니메이션 시작
+// ======================================================
+
+function startEffectAnimation() {
+
+    if (
+        effectAnimationRunning
+    )
+        return;
+
+
+    effectAnimationRunning =
+        true;
+
+
+    requestAnimationFrame(
+        updateEffects
+    );
+
+}
+
+
+// ======================================================
+// 이펙트 업데이트
+// ======================================================
+
+function updateEffects() {
+
+    ctx.save();
+
+
+    /*
+        Canvas 전체를 초기화한 뒤
+        선과 이펙트를 다시 그림
+    */
 
     ctx.clearRect(
         0,
@@ -1005,20 +1485,339 @@ function draw() {
     );
 
 
-    ctx.lineWidth = 5;
+    /*
+        실제 선
+    */
+
+    drawLines();
+
+
+    // ----------------------------------
+    // 베기 잔상
+    // ----------------------------------
+
+    for (
+        let i =
+            slashTrails.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const trail =
+            slashTrails[i];
+
+
+        trail.life--;
+
+
+        const alpha =
+            trail.life /
+            trail.maxLife;
+
+
+        ctx.save();
+
+
+        ctx.translate(
+            trail.x,
+            trail.y
+        );
+
+
+        ctx.rotate(
+            trail.angle
+        );
+
+
+        /*
+            넓은 베기 궤적
+        */
+
+        ctx.globalAlpha =
+            alpha * 0.65;
+
+
+        ctx.lineWidth =
+            12 * alpha;
+
+
+        ctx.lineCap =
+            "round";
+
+
+        ctx.strokeStyle =
+            "white";
+
+
+        ctx.beginPath();
+
+
+        ctx.moveTo(
+            -55,
+            0
+        );
+
+
+        ctx.quadraticCurveTo(
+            0,
+            -18,
+            55,
+            0
+        );
+
+
+        ctx.stroke();
+
+
+        /*
+            중심의 밝은 선
+        */
+
+        ctx.globalAlpha =
+            alpha;
+
+
+        ctx.lineWidth =
+            4;
+
+
+        ctx.beginPath();
+
+
+        ctx.moveTo(
+            -50,
+            0
+        );
+
+
+        ctx.quadraticCurveTo(
+            0,
+            -14,
+            50,
+            0
+        );
+
+
+        ctx.stroke();
+
+
+        ctx.restore();
+
+
+        if (
+            trail.life <= 0
+        ) {
+
+            slashTrails.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+
+    // ----------------------------------
+    // 입자
+    // ----------------------------------
+
+    for (
+        let i =
+            particles.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const p =
+            particles[i];
+
+
+        p.x += p.vx;
+
+        p.y += p.vy;
+
+
+        p.vx *= 0.96;
+
+        p.vy *= 0.96;
+
+
+        p.life--;
+
+
+        const alpha =
+            p.life /
+            p.maxLife;
+
+
+        if (
+            p.type === "flash"
+        ) {
+
+            /*
+                중앙 섬광
+            */
+
+            const size =
+                p.size *
+                (
+                    1 -
+                    p.life /
+                    p.maxLife
+                );
+
+
+            ctx.globalAlpha =
+                alpha;
+
+
+            ctx.beginPath();
+
+
+            ctx.arc(
+                p.x,
+                p.y,
+                size,
+                0,
+                Math.PI * 2
+            );
+
+
+            ctx.fillStyle =
+                "white";
+
+
+            ctx.fill();
+
+        }
+
+        else if (
+            p.type === "fragment"
+        ) {
+
+            /*
+                적 파편
+            */
+
+            ctx.globalAlpha =
+                alpha;
+
+
+            ctx.fillStyle =
+                "#ff4444";
+
+
+            ctx.beginPath();
+
+
+            ctx.arc(
+                p.x,
+                p.y,
+                p.size,
+                0,
+                Math.PI * 2
+            );
+
+
+            ctx.fill();
+
+        }
+
+        else {
+
+            /*
+                빛 / 베기 입자
+            */
+
+            ctx.globalAlpha =
+                alpha;
+
+
+            ctx.fillStyle =
+                "white";
+
+
+            ctx.beginPath();
+
+
+            ctx.arc(
+                p.x,
+                p.y,
+                p.size,
+                0,
+                Math.PI * 2
+            );
+
+
+            ctx.fill();
+
+        }
+
+
+        if (
+            p.life <= 0
+        ) {
+
+            particles.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+
+    ctx.restore();
+
+
+    /*
+        아직 이펙트가 남아있으면
+        계속 업데이트
+    */
+
+    if (
+        particles.length > 0 ||
+        slashTrails.length > 0
+    ) {
+
+        requestAnimationFrame(
+            updateEffects
+        );
+
+    }
+
+    else {
+
+        effectAnimationRunning =
+            false;
+
+    }
+
+}
+
+
+// ======================================================
+// 선 그리기
+// ======================================================
+
+function drawLines() {
+
+    ctx.save();
+
+
+    ctx.lineWidth =
+        5;
+
 
     ctx.lineCap =
         "round";
 
+
     ctx.strokeStyle =
         "white";
 
-
-    /*
-        ★ 실제 플레이어가 그은 선만 표시
-
-        solutionPath는 절대로 그리지 않는다.
-    */
 
     for (
         const line of lines
@@ -1045,7 +1844,7 @@ function draw() {
 
 
     /*
-        현재 드래그 중인 선
+        현재 그리고 있는 선
     */
 
     if (currentLine) {
@@ -1068,6 +1867,28 @@ function draw() {
         ctx.stroke();
 
     }
+
+
+    ctx.restore();
+
+}
+
+
+// ======================================================
+// 기본 draw
+// ======================================================
+
+function draw() {
+
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    drawLines();
 
 }
 
@@ -1148,7 +1969,7 @@ function pointToLineDistance(
 
 
 // ======================================================
-// 적 공격 판정
+// 적 피격
 // ======================================================
 
 function checkEnemyHit(
@@ -1158,10 +1979,6 @@ function checkEnemyHit(
 
     enemies.forEach(
         enemy => {
-
-            /*
-                이미 죽은 적
-            */
 
             if (
                 enemy.style.display ===
@@ -1200,13 +2017,30 @@ function checkEnemyHit(
 
 
             /*
-                선에서 30px 이내면
-                적 처치
+                적이 선에서 30px 이내면
+                처치
             */
 
             if (
                 hitDistance < 30
             ) {
+
+                /*
+                    ★ 적 폭발 이펙트
+                */
+
+                createEnemyExplosion(
+
+                    enemyPos.x,
+
+                    enemyPos.y
+
+                );
+
+
+                /*
+                    적 제거
+                */
 
                 enemy.style.opacity =
                     "0";
@@ -1260,11 +2094,6 @@ slashButton.addEventListener(
 
 function moveAlongPath(index) {
 
-    /*
-        모든 선을 이동했으면
-        공격 종료
-    */
-
     if (
         index >=
         lines.length
@@ -1294,12 +2123,10 @@ function moveAlongPath(index) {
 
 
     /*
-        ★ 매우 빠른 속도
+        ★ 매우 빠른 베기
 
-        선의 길이에 관계없이
-        한 선분당 0.12초.
-
-        따라서 긴 선도 빠르게 이동한다.
+        선의 길이와 상관없이
+        0.12초 동안 이동.
     */
 
     const duration =
@@ -1310,10 +2137,16 @@ function moveAlongPath(index) {
         performance.now();
 
 
+    let previousX =
+        start.x;
+
+    let previousY =
+        start.y;
+
+
     function animate(time) {
 
         const progress =
-
             Math.min(
 
                 (
@@ -1361,7 +2194,38 @@ function moveAlongPath(index) {
 
 
         /*
-            이동하면서 적을 공격
+            이동 방향
+        */
+
+        const angle =
+            Math.atan2(
+
+                playerPos.y -
+                previousY,
+
+                playerPos.x -
+                previousX
+
+            );
+
+
+        /*
+            ★ 베기 궤적 생성
+        */
+
+        createSlashTrail(
+
+            playerPos.x,
+
+            playerPos.y,
+
+            angle
+
+        );
+
+
+        /*
+            적 공격
         */
 
         checkEnemyHit(
@@ -1379,6 +2243,13 @@ function moveAlongPath(index) {
             }
 
         );
+
+
+        previousX =
+            playerPos.x;
+
+        previousY =
+            playerPos.y;
 
 
         if (
@@ -1438,9 +2309,7 @@ function finishAttack() {
 
 
     /*
-        =====================================
         성공
-        =====================================
     */
 
     if (
@@ -1456,9 +2325,7 @@ function finishAttack() {
 
 
     /*
-        =====================================
         실패
-        =====================================
     */
 
     else {
@@ -1474,22 +2341,14 @@ function finishAttack() {
 
 
 // ======================================================
-// 스테이지 실패 → 같은 스테이지 재시작
+// 실패 → 같은 스테이지 재시작
 // ======================================================
 
 function restartStage() {
 
     /*
-        ★ 정답 경로는 새로 만들지 않는다.
-
-        ★ 적 위치도 새로 만들지 않는다.
-
-        따라서 방금 실패한 퍼즐을
-        그대로 다시 풀 수 있다.
+        선 삭제
     */
-
-
-    // 선 삭제
 
     lines = [];
 
@@ -1497,13 +2356,15 @@ function restartStage() {
         null;
 
 
-    // 플레이어 초기 위치
+    /*
+        플레이어 원위치
+    */
 
     resetPlayerPosition();
 
 
     /*
-        죽었던 적 부활
+        적 부활
 
         위치는 그대로다.
     */
@@ -1521,7 +2382,18 @@ function restartStage() {
     );
 
 
-    // 선 개수 복구
+    /*
+        이펙트 정리
+    */
+
+    particles = [];
+
+    slashTrails = [];
+
+
+    /*
+        선 개수 복구
+    */
 
     updateLineCount();
 
@@ -1551,12 +2423,16 @@ function nextStage() {
         "STAGE " + stage;
 
 
-    // 플레이어 초기 위치
+    /*
+        플레이어 원위치
+    */
 
     resetPlayerPosition();
 
 
-    // 기존 선 삭제
+    /*
+        선 삭제
+    */
 
     lines = [];
 
@@ -1565,14 +2441,27 @@ function nextStage() {
 
 
     /*
-        ★ 여기서만
-        새로운 정답 경로와
-        새로운 적 배치를 만든다.
+        새로운 선 제한
     */
 
     updateMaxLines();
 
+
+    /*
+        새로운 해결 가능한
+        적 배치 생성
+    */
+
     spawnEnemies();
+
+
+    /*
+        이펙트 초기화
+    */
+
+    particles = [];
+
+    slashTrails = [];
 
 
     updateLineCount();
@@ -1596,17 +2485,15 @@ function nextStage() {
 
 resize();
 
-
 updateMaxLines();
-
 
 spawnEnemies();
 
-
 updateLineCount();
 
+draw();
 
 </script>
 
 </body>
-</html>
+      </html>
