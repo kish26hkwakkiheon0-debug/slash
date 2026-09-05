@@ -159,8 +159,7 @@ canvas {
         0 0 10px #d33;
 
     transition:
-        opacity 0.08s,
-        transform 0.08s;
+        opacity 0.08s;
 }
 
 
@@ -196,12 +195,14 @@ canvas {
     z-index: 20;
 }
 
+
 #slashButton:active {
 
     transform:
         translateX(-50%)
         scale(0.95);
 }
+
 
 #slashButton:disabled {
 
@@ -215,24 +216,19 @@ canvas {
 
 <body>
 
-
 <div id="game">
 
     <div id="stage">
         STAGE 1
     </div>
 
-
     <div id="lineCount">
         선: 2 / 2
     </div>
 
-
     <canvas id="canvas"></canvas>
 
-
     <div id="player"></div>
-
 
     <button id="slashButton">
         ⚔ 베기
@@ -295,7 +291,7 @@ let enemies = [];
 
 
 // ======================================================
-// 플레이어가 그은 선
+// 실제 플레이어가 그은 선
 // ======================================================
 
 let lines = [];
@@ -327,22 +323,12 @@ let solutionPath = [];
 
 
 // ======================================================
-// 이펙트 입자
+// 이펙트
 // ======================================================
 
 let particles = [];
 
-
-// ======================================================
-// 베기 잔상
-// ======================================================
-
 let slashTrails = [];
-
-
-// ======================================================
-// 애니메이션 루프
-// ======================================================
 
 let effectAnimationRunning = false;
 
@@ -356,13 +342,11 @@ function getEnemyCount() {
     let count =
         Math.floor(stage / 5);
 
-
     count =
         Math.max(
             1,
             count
         );
-
 
     count =
         Math.min(
@@ -370,8 +354,8 @@ function getEnemyCount() {
             count
         );
 
-
     return count;
+
 }
 
 
@@ -383,7 +367,6 @@ function updateMaxLines() {
 
     const enemyCount =
         getEnemyCount();
-
 
     maxLines =
         Math.max(
@@ -404,7 +387,6 @@ function updateLineCount() {
         maxLines -
         lines.length;
 
-
     lineCountText.textContent =
         `선: ${remaining} / ${maxLines}`;
 
@@ -412,7 +394,7 @@ function updateLineCount() {
 
 
 // ======================================================
-// 플레이어 위치 초기화
+// 플레이어 초기 위치
 // ======================================================
 
 function resetPlayerPosition() {
@@ -420,14 +402,11 @@ function resetPlayerPosition() {
     playerPos.x =
         width / 2;
 
-
     playerPos.y =
         height * 0.72;
 
-
     player.style.left =
         playerPos.x + "px";
-
 
     player.style.top =
         playerPos.y + "px";
@@ -444,21 +423,16 @@ function resize() {
     width =
         window.innerWidth;
 
-
     height =
         window.innerHeight;
-
 
     canvas.width =
         width;
 
-
     canvas.height =
         height;
 
-
     resetPlayerPosition();
-
 
     draw();
 
@@ -514,6 +488,10 @@ function pointOnLine(
 
 // ======================================================
 // 정답 경로 생성
+//
+// 경로끼리 지나치게 가까워지지 않도록
+// 새로운 지점을 만들 때 기존 지점들과의
+// 거리도 검사한다.
 // ======================================================
 
 function generateSolutionPath() {
@@ -532,50 +510,124 @@ function generateSolutionPath() {
     };
 
 
+    const points = [
+        current
+    ];
+
+
     for (
         let i = 0;
         i < maxLines;
         i++
     ) {
 
-        let next;
+        let next = null;
 
 
-        let attempts = 0;
+        /*
+            새로운 지점을 여러 번 시도한다.
+        */
 
+        for (
+            let attempt = 0;
+            attempt < 80;
+            attempt++
+        ) {
 
-        do {
-
-            next = {
+            const candidate = {
 
                 x:
-                    60 +
+                    70 +
                     Math.random()
-                    * (width - 120),
+                    * (width - 140),
 
                 y:
                     100 +
                     Math.random()
-                    * (height * 0.47)
+                    * (height * 0.48)
 
             };
 
 
-            attempts++;
+            /*
+                바로 이전 지점과
+                최소 130px 이상 떨어져야 한다.
+            */
+
+            if (
+                distance(
+                    current,
+                    candidate
+                ) < 130
+            ) {
+
+                continue;
+
+            }
 
 
-        } while (
+            /*
+                기존의 다른 지점과도
+                너무 가까우면 피한다.
 
-            distance(
-                current,
-                next
-            ) < 120
+                이렇게 하면 경로가
+                자기 자신 주변을 빙빙 도는 현상이 감소한다.
+            */
 
-            &&
+            let tooClose = false;
 
-            attempts < 30
 
-        );
+            for (
+                let j = 0;
+                j < points.length - 1;
+                j++
+            ) {
+
+                if (
+                    distance(
+                        points[j],
+                        candidate
+                    ) < 110
+                ) {
+
+                    tooClose = true;
+
+                    break;
+
+                }
+
+            }
+
+
+            if (
+                tooClose
+            ) {
+
+                continue;
+
+            }
+
+
+            next =
+                candidate;
+
+            break;
+
+        }
+
+
+        /*
+            충분히 좋은 위치를 찾지 못했다면
+            전체 스테이지를 다시 생성한다.
+        */
+
+        if (
+            next === null
+        ) {
+
+            return false;
+
+        }
 
 
         solutionPath.push({
@@ -603,15 +655,24 @@ function generateSolutionPath() {
         });
 
 
-        current = next;
+        points.push(
+            next
+        );
+
+
+        current =
+            next;
 
     }
+
+
+    return true;
 
 }
 
 
 // ======================================================
-// 경로 전체의 길이
+// 전체 경로 길이
 // ======================================================
 
 function getPathLength() {
@@ -638,8 +699,7 @@ function getPathLength() {
 
 
 // ======================================================
-// 경로의 전체 길이 기준으로
-// 특정 거리만큼 떨어진 위치 찾기
+// 전체 경로에서 특정 거리의 위치
 // ======================================================
 
 function pointAtDistanceFromPath(
@@ -702,9 +762,11 @@ function pointAtDistanceFromPath(
 
     return {
 
-        x: last.end.x,
+        x:
+            last.end.x,
 
-        y: last.end.y
+        y:
+            last.end.y
 
     };
 
@@ -714,12 +776,7 @@ function pointAtDistanceFromPath(
 // ======================================================
 // 적 위치 생성
 //
-// ★ 핵심 변경 부분
-//
-// 적을 각각 랜덤한 선분에 넣는 대신
-// "전체 경로"에 균등하게 배치한다.
-//
-// 따라서 한곳에 몰릴 가능성이 크게 줄어든다.
+// ★ 이번 버전의 핵심
 // ======================================================
 
 function generateEnemyPositions() {
@@ -736,30 +793,34 @@ function generateEnemyPositions() {
 
 
     /*
-        적 사이 최소 거리
+        적 사이의 최소 실제 거리.
 
-        적 크기가 약 40px이므로
-        75px 정도로 떨어뜨린다.
+        적 크기가 40px이므로
+        단순히 겹치지만 않는 수준이 아니라
+        90px까지 떨어뜨린다.
     */
 
     const minimumDistance =
-        75;
+        90;
 
 
     /*
-        적이 경로 전체에
-        골고루 퍼지도록 한다.
+        적이 위치할 수 있는 범위.
 
-        예:
+        양 끝을 피해서 배치한다.
+    */
 
-        적 4명이라면
+    const startRatio =
+        0.10;
 
-        20%
-        40%
-        60%
-        80%
 
-        근처에 배치.
+    const endRatio =
+        0.90;
+
+
+    /*
+        기본적으로 균등하게 배치하되
+        랜덤성을 조금 추가한다.
     */
 
     for (
@@ -768,51 +829,55 @@ function generateEnemyPositions() {
         i++
     ) {
 
-        /*
-            균등 위치 + 약간의 랜덤 오차
-        */
-
         const baseRatio =
-            (i + 1)
-            /
-            (enemyCount + 1);
 
+            startRatio +
 
-        /*
-            랜덤 오차
-
-            너무 크게 움직이면
-            적이 특정 구역으로 몰릴 수 있으므로
-            작게 유지한다.
-        */
-
-        const jitter =
             (
-                Math.random() - 0.5
+                endRatio -
+                startRatio
             )
             *
+            (
+                (i + 0.5) /
+                enemyCount
+            );
+
+
+        /*
+            후반부에는 약간 더 랜덤하게.
+        */
+
+        const jitterAmount =
             Math.min(
-                0.10,
-                0.6 / enemyCount
+                0.045,
+                0.20 /
+                enemyCount
             );
 
 
         let ratio =
-            baseRatio + jitter;
+            baseRatio +
+            (
+                Math.random() - 0.5
+            )
+            *
+            jitterAmount;
 
 
         ratio =
             Math.max(
-                0.08,
+                startRatio,
                 Math.min(
-                    0.92,
+                    endRatio,
                     ratio
                 )
             );
 
 
         const targetDistance =
-            totalLength * ratio;
+            totalLength *
+            ratio;
 
 
         const base =
@@ -822,23 +887,26 @@ function generateEnemyPositions() {
 
 
         /*
-            정답선에서 살짝 벗어나게 한다.
+            경로에서 벗어나는 정도.
 
-            최대 14px.
+            기존 14px → 최대 20px.
 
-            공격 판정은 30px이므로
-            여전히 충분히 맞출 수 있다.
+            피격 범위가 24px이므로
+            정답 경로를 정확하게 따라가야 한다.
         */
 
         const angle =
             Math.random()
-            * Math.PI
-            * 2;
+            *
+            Math.PI
+            *
+            2;
 
 
         const offset =
+            5 +
             Math.random()
-            * 14;
+            * 15;
 
 
         const position = {
@@ -856,34 +924,35 @@ function generateEnemyPositions() {
         };
 
 
-        positions.push(
-            position
-        );
+        /*
+            화면 밖으로 나가지 않도록 한다.
+        */
 
-    }
+        if (
+            position.x < 45 ||
+            position.x > width - 45 ||
+            position.y < 80 ||
+            position.y > height * 0.65
+        ) {
+
+            return null;
+
+        }
 
 
-    /*
-        혹시라도 경로 자체가 서로 가까이
-        지나가는 경우까지 검사한다.
-    */
-
-    for (
-        let i = 0;
-        i < positions.length;
-        i++
-    ) {
+        /*
+            이전에 배치한 적과
+            실제 화면 거리 검사.
+        */
 
         for (
-            let j = i + 1;
-            j < positions.length;
-            j++
+            const other of positions
         ) {
 
             if (
                 distance(
-                    positions[i],
-                    positions[j]
+                    position,
+                    other
                 )
                 <
                 minimumDistance
@@ -894,6 +963,11 @@ function generateEnemyPositions() {
             }
 
         }
+
+
+        positions.push(
+            position
+        );
 
     }
 
@@ -906,14 +980,14 @@ function generateEnemyPositions() {
 // ======================================================
 // 적 생성
 //
-// 위치가 좋지 않으면
-// 정답 경로부터 다시 생성한다.
+// 위치가 마음에 들지 않으면
+// 경로부터 다시 생성한다.
 // ======================================================
 
 function spawnEnemies() {
 
     /*
-        기존 적 제거
+        기존 적 삭제
     */
 
     enemies.forEach(
@@ -929,39 +1003,62 @@ function spawnEnemies() {
 
 
     /*
-        적들이 충분히 떨어질 때까지
-        새로운 경로를 생성한다.
+        스테이지가 클수록
+        더 엄격하게 생성한다.
+
+        최대 500회까지 시도.
     */
 
-    let attempts = 0;
-
-
-    while (
-        positions === null &&
-        attempts < 100
+    for (
+        let attempt = 0;
+        attempt < 500;
+        attempt++
     ) {
 
-        generateSolutionPath();
+        const pathOK =
+            generateSolutionPath();
+
+
+        if (!pathOK) {
+
+            continue;
+
+        }
 
 
         positions =
             generateEnemyPositions();
 
 
-        attempts++;
+        if (
+            positions !== null
+        ) {
+
+            break;
+
+        }
 
     }
 
 
     /*
-        혹시 100번 안에 성공하지 못했다면
-        현재 경로를 그대로 사용한다.
+        이론적으로 거의 발생하지 않지만
+        혹시 생성에 실패하면
+        안전한 기본 배치를 만든다.
     */
 
-    if (positions === null) {
+    if (
+        positions === null
+    ) {
 
-        positions =
-            [];
+        generateSolutionPath();
+
+
+        positions = [];
+
+
+        const totalLength =
+            getPathLength();
 
 
         for (
@@ -970,19 +1067,23 @@ function spawnEnemies() {
             i++
         ) {
 
-            const segment =
-                solutionPath[
-                    i %
-                    solutionPath.length
-                ];
+            const ratio =
+                (
+                    i + 1
+                )
+                /
+                (
+                    getEnemyCount() + 1
+                );
 
 
             positions.push(
 
-                pointOnLine(
-                    segment.start,
-                    segment.end,
-                    0.5
+                pointAtDistanceFromPath(
+
+                    totalLength *
+                    ratio
+
                 )
 
             );
@@ -993,7 +1094,7 @@ function spawnEnemies() {
 
 
     /*
-        적 DOM 생성
+        실제 적 DOM 생성
     */
 
     positions.forEach(
@@ -1095,6 +1196,11 @@ game.addEventListener(
         let start;
 
 
+        /*
+            첫 번째 선:
+            플레이어 → 손가락
+        */
+
         if (
             lines.length === 0
         ) {
@@ -1110,6 +1216,12 @@ game.addEventListener(
             };
 
         }
+
+
+        /*
+            이후:
+            이전 선의 끝 → 손가락
+        */
 
         else {
 
@@ -1221,6 +1333,8 @@ game.addEventListener(
 
 // ======================================================
 // 적 폭발 이펙트
+//
+// 기존의 효과 유지
 // ======================================================
 
 function createEnemyExplosion(
@@ -1251,7 +1365,7 @@ function createEnemyExplosion(
 
 
     /*
-        바깥쪽으로 튀는 파편
+        붉은 파편
     */
 
     for (
@@ -1303,7 +1417,7 @@ function createEnemyExplosion(
 
 
     /*
-        작은 빛 입자
+        작은 입자
     */
 
     for (
@@ -1360,7 +1474,7 @@ function createEnemyExplosion(
 
 
 // ======================================================
-// 베기 잔상 생성
+// ★ 깔끔한 검격 이펙트
 // ======================================================
 
 function createSlashTrail(
@@ -1377,62 +1491,11 @@ function createSlashTrail(
 
         angle: angle,
 
-        life: 10,
+        life: 8,
 
-        maxLife: 10
+        maxLife: 8
 
     });
-
-
-    /*
-        베기 주변의 작은 입자
-    */
-
-    for (
-        let i = 0;
-        i < 2;
-        i++
-    ) {
-
-        particles.push({
-
-            x:
-                x +
-                (
-                    Math.random()
-                    - 0.5
-                ) * 20,
-
-            y:
-                y +
-                (
-                    Math.random()
-                    - 0.5
-                ) * 20,
-
-            vx:
-                (
-                    Math.random()
-                    - 0.5
-                ) * 2,
-
-            vy:
-                (
-                    Math.random()
-                    - 0.5
-                ) * 2,
-
-            life: 12,
-
-            maxLife: 12,
-
-            size: 2,
-
-            type: "slash"
-
-        });
-
-    }
 
 
     startEffectAnimation();
@@ -1469,14 +1532,6 @@ function startEffectAnimation() {
 
 function updateEffects() {
 
-    ctx.save();
-
-
-    /*
-        Canvas 전체를 초기화한 뒤
-        선과 이펙트를 다시 그림
-    */
-
     ctx.clearRect(
         0,
         0,
@@ -1492,9 +1547,9 @@ function updateEffects() {
     drawLines();
 
 
-    // ----------------------------------
-    // 베기 잔상
-    // ----------------------------------
+    // ==================================================
+    // ★ 깔끔한 검격
+    // ==================================================
 
     for (
         let i =
@@ -1510,9 +1565,19 @@ function updateEffects() {
         trail.life--;
 
 
+        const progress =
+            1 -
+            (
+                trail.life /
+                trail.maxLife
+            );
+
+
         const alpha =
-            trail.life /
-            trail.maxLife;
+            (
+                trail.life /
+                trail.maxLife
+            );
 
 
         ctx.save();
@@ -1530,15 +1595,20 @@ function updateEffects() {
 
 
         /*
-            넓은 베기 궤적
+            ----------------------------------
+            바깥쪽의 얇은 검격
+            ----------------------------------
         */
 
         ctx.globalAlpha =
-            alpha * 0.65;
+            alpha * 0.25;
 
 
         ctx.lineWidth =
-            12 * alpha;
+            10 *
+            (
+                1 - progress
+            );
 
 
         ctx.lineCap =
@@ -1553,16 +1623,16 @@ function updateEffects() {
 
 
         ctx.moveTo(
-            -55,
-            0
+            -65,
+            8
         );
 
 
         ctx.quadraticCurveTo(
-            0,
-            -18,
-            55,
-            0
+            -5,
+            -30,
+            65,
+            -5
         );
 
 
@@ -1570,7 +1640,46 @@ function updateEffects() {
 
 
         /*
-            중심의 밝은 선
+            ----------------------------------
+            메인 검격
+            ----------------------------------
+        */
+
+        ctx.globalAlpha =
+            alpha * 0.8;
+
+
+        ctx.lineWidth =
+            5 *
+            (
+                1 - progress * 0.5
+            );
+
+
+        ctx.beginPath();
+
+
+        ctx.moveTo(
+            -60,
+            6
+        );
+
+
+        ctx.quadraticCurveTo(
+            0,
+            -25,
+            60,
+            -2
+        );
+
+
+        ctx.stroke();
+
+
+        /*
+            ----------------------------------
+            가장 밝은 중심선
+            ----------------------------------
         */
 
         ctx.globalAlpha =
@@ -1578,23 +1687,23 @@ function updateEffects() {
 
 
         ctx.lineWidth =
-            4;
+            2;
 
 
         ctx.beginPath();
 
 
         ctx.moveTo(
-            -50,
-            0
+            -52,
+            3
         );
 
 
         ctx.quadraticCurveTo(
             0,
-            -14,
-            50,
-            0
+            -21,
+            54,
+            -3
         );
 
 
@@ -1618,9 +1727,9 @@ function updateEffects() {
     }
 
 
-    // ----------------------------------
-    // 입자
-    // ----------------------------------
+    // ==================================================
+    // 적 폭발 / 기타 입자
+    // ==================================================
 
     for (
         let i =
@@ -1651,13 +1760,17 @@ function updateEffects() {
             p.maxLife;
 
 
+        ctx.globalAlpha =
+            alpha;
+
+
+        /*
+            중앙 섬광
+        */
+
         if (
             p.type === "flash"
         ) {
-
-            /*
-                중앙 섬광
-            */
 
             const size =
                 p.size *
@@ -1666,10 +1779,6 @@ function updateEffects() {
                     p.life /
                     p.maxLife
                 );
-
-
-            ctx.globalAlpha =
-                alpha;
 
 
             ctx.beginPath();
@@ -1692,17 +1801,14 @@ function updateEffects() {
 
         }
 
+
+        /*
+            붉은 파편
+        */
+
         else if (
             p.type === "fragment"
         ) {
-
-            /*
-                적 파편
-            */
-
-            ctx.globalAlpha =
-                alpha;
-
 
             ctx.fillStyle =
                 "#ff4444";
@@ -1724,15 +1830,12 @@ function updateEffects() {
 
         }
 
+
+        /*
+            작은 흰색 입자
+        */
+
         else {
-
-            /*
-                빛 / 베기 입자
-            */
-
-            ctx.globalAlpha =
-                alpha;
-
 
             ctx.fillStyle =
                 "white";
@@ -1769,12 +1872,12 @@ function updateEffects() {
     }
 
 
-    ctx.restore();
+    ctx.globalAlpha =
+        1;
 
 
     /*
-        아직 이펙트가 남아있으면
-        계속 업데이트
+        이펙트가 남아 있으면 계속 실행
     */
 
     if (
@@ -1799,7 +1902,7 @@ function updateEffects() {
 
 
 // ======================================================
-// 선 그리기
+// 실제 선 그리기
 // ======================================================
 
 function drawLines() {
@@ -1818,6 +1921,10 @@ function drawLines() {
     ctx.strokeStyle =
         "white";
 
+
+    /*
+        완성된 선
+    */
 
     for (
         const line of lines
@@ -1983,8 +2090,11 @@ function checkEnemyHit(
             if (
                 enemy.style.display ===
                 "none"
-            )
+            ) {
+
                 return;
+
+            }
 
 
             const rect =
@@ -2017,17 +2127,15 @@ function checkEnemyHit(
 
 
             /*
-                적이 선에서 30px 이내면
-                처치
+                ★ 난이도 상승
+
+                기존 30px
+                → 24px
             */
 
             if (
-                hitDistance < 30
+                hitDistance < 24
             ) {
-
-                /*
-                    ★ 적 폭발 이펙트
-                */
 
                 createEnemyExplosion(
 
@@ -2037,10 +2145,6 @@ function checkEnemyHit(
 
                 );
 
-
-                /*
-                    적 제거
-                */
 
                 enemy.style.opacity =
                     "0";
@@ -2123,10 +2227,10 @@ function moveAlongPath(index) {
 
 
     /*
-        ★ 매우 빠른 베기
+        매우 빠른 이동
 
-        선의 길이와 상관없이
-        0.12초 동안 이동.
+        길이와 관계없이
+        선 하나를 0.12초에 이동.
     */
 
     const duration =
@@ -2139,6 +2243,7 @@ function moveAlongPath(index) {
 
     let previousX =
         start.x;
+
 
     let previousY =
         start.y;
@@ -2194,7 +2299,7 @@ function moveAlongPath(index) {
 
 
         /*
-            이동 방향
+            이동 방향 계산
         */
 
         const angle =
@@ -2210,7 +2315,7 @@ function moveAlongPath(index) {
 
 
         /*
-            ★ 베기 궤적 생성
+            ★ 깔끔한 검격 생성
         */
 
         createSlashTrail(
@@ -2225,7 +2330,7 @@ function moveAlongPath(index) {
 
 
         /*
-            적 공격
+            적 판정
         */
 
         checkEnemyHit(
@@ -2247,6 +2352,7 @@ function moveAlongPath(index) {
 
         previousX =
             playerPos.x;
+
 
         previousY =
             playerPos.y;
@@ -2341,13 +2447,13 @@ function finishAttack() {
 
 
 // ======================================================
-// 실패 → 같은 스테이지 재시작
+// 실패 → 같은 스테이지
 // ======================================================
 
 function restartStage() {
 
     /*
-        선 삭제
+        선 초기화
     */
 
     lines = [];
@@ -2357,7 +2463,7 @@ function restartStage() {
 
 
     /*
-        플레이어 원위치
+        플레이어 초기화
     */
 
     resetPlayerPosition();
@@ -2366,7 +2472,7 @@ function restartStage() {
     /*
         적 부활
 
-        위치는 그대로다.
+        ★ 위치는 그대로 유지
     */
 
     enemies.forEach(
@@ -2383,17 +2489,13 @@ function restartStage() {
 
 
     /*
-        이펙트 정리
+        이펙트 제거
     */
 
     particles = [];
 
     slashTrails = [];
 
-
-    /*
-        선 개수 복구
-    */
 
     updateLineCount();
 
@@ -2424,14 +2526,14 @@ function nextStage() {
 
 
     /*
-        플레이어 원위치
+        플레이어 초기화
     */
 
     resetPlayerPosition();
 
 
     /*
-        선 삭제
+        선 초기화
     */
 
     lines = [];
@@ -2441,15 +2543,15 @@ function nextStage() {
 
 
     /*
-        새로운 선 제한
+        선 개수 변경
     */
 
     updateMaxLines();
 
 
     /*
-        새로운 해결 가능한
-        적 배치 생성
+        ★ 새로운 해결 가능한
+        스테이지 생성
     */
 
     spawnEnemies();
@@ -2496,4 +2598,5 @@ draw();
 </script>
 
 </body>
+
 </html>
