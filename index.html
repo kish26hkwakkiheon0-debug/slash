@@ -96,19 +96,19 @@ html, body {
     transform:
         translate(-50%, -50%);
 
-    width: 0;
-    height: 0;
+    width: 90px;
+    height: 90px;
 
-    border-top:
-        42px solid transparent;
+    border: none;
+    background: white;
 
-    border-bottom:
-        42px solid transparent;
-
-    border-left:
-        68px solid white;
-
-    background: transparent;
+    /* 실제 버튼 영역은 90×90 */
+    /* 보이는 부분만 삼각형으로 자름 */
+    clip-path: polygon(
+        25% 10%,
+        25% 90%,
+        90% 50%
+    );
 
     z-index: 20;
 
@@ -120,6 +120,17 @@ html, body {
 
     transition:
         transform 0.12s;
+    
+    cursor: pointer;
+}
+
+
+/* 눌렀을 때 */
+
+#startButton:active {
+    transform:
+        translate(-50%, -50%)
+        scale(0.85);
 }
 
 #startButton:active {
