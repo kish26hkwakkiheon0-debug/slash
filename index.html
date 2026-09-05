@@ -1,24 +1,21 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport"
-content="width=device-width,
-maximum-scale=1.0,
-user-scalable=no">
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no">
 
 <title>Slash Game</title>
 
 <style>
-
 * {
     box-sizing: border-box;
     user-select: none;
     -webkit-user-select: none;
-    touch-action: none;
+    -webkit-touch-callout: none;
 }
 
 html, body {
@@ -30,10 +27,22 @@ html, body {
     font-family: Arial, sans-serif;
 }
 
+body {
+    touch-action: none;
+}
+
+button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+
+/* =====================================================
+   전체
+===================================================== */
+
 #game {
-    position: relative;
-    width: 100%;
-    height: 100%;
+    position: fixed;
+    inset: 0;
     background: #050505;
     overflow: hidden;
 }
@@ -44,22 +53,28 @@ html, body {
 ===================================================== */
 
 #startScreen {
-    position: absolute;
+    position: fixed;
     inset: 0;
+
+    width: 100%;
+    height: 100%;
+
     background: #050505;
-    z-index: 100;
+
+    z-index: 1000;
+
     overflow: hidden;
 }
-
-
-/* 메뉴 배경 */
 
 #menuCanvas {
     position: absolute;
     inset: 0;
+
     width: 100%;
     height: 100%;
+
     z-index: 0;
+
     pointer-events: none;
 }
 
@@ -68,18 +83,24 @@ html, body {
 
 #gameTitle {
     position: absolute;
+
     top: 17%;
     left: 0;
+
     width: 100%;
 
     text-align: center;
 
     color: white;
+
     font-size: 42px;
     font-weight: bold;
+
     letter-spacing: 3px;
 
     z-index: 10;
+
+    pointer-events: none;
 
     text-shadow:
         0 0 15px rgba(255,255,255,0.25);
@@ -94,8 +115,8 @@ html, body {
     left: 50%;
     top: 50%;
 
-    width: 100px;
-    height: 100px;
+    width: 110px;
+    height: 110px;
 
     transform:
         translate(-50%, -50%);
@@ -104,17 +125,25 @@ html, body {
 
     background: white;
 
+    /*
+       실제 버튼은 110 × 110.
+       보이는 부분만 삼각형.
+    */
+
     clip-path: polygon(
         25% 10%,
         25% 90%,
         90% 50%
     );
 
-    z-index: 1000;
+    z-index: 100;
 
     cursor: pointer;
 
     touch-action: manipulation;
+
+    padding: 0;
+    margin: 0;
 
     filter:
         drop-shadow(
@@ -133,23 +162,25 @@ html, body {
 }
 
 
-/* 좌우 메뉴 버튼 */
+/* 좌우 메뉴 */
 
 .menuButton {
     position: absolute;
 
     bottom: 16%;
 
-    width: 85px;
-    height: 85px;
+    width: 100px;
+    height: 90px;
 
     border: none;
+
     background: transparent;
 
     color: white;
 
     display: flex;
     flex-direction: column;
+
     align-items: center;
     justify-content: center;
 
@@ -158,14 +189,16 @@ html, body {
     font-size: 14px;
 
     z-index: 20;
+
+    touch-action: manipulation;
 }
 
 #characterButton {
-    left: 15%;
+    left: 12%;
 }
 
 #settingsButton {
-    right: 15%;
+    right: 12%;
 }
 
 .menuIcon {
@@ -173,9 +206,11 @@ html, body {
     height: 46px;
 
     border: 2px solid #777;
+
     border-radius: 12px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -193,22 +228,28 @@ html, body {
 ===================================================== */
 
 #gameScreen {
-    position: absolute;
+    position: fixed;
     inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: #050505;
 
     display: none;
 
-    background: #050505;
+    z-index: 10;
+
+    overflow: hidden;
 }
 
 
-/* 게임용 Canvas */
+/* 게임 Canvas */
 
 #canvas {
     position: absolute;
 
-    left: 0;
-    top: 0;
+    inset: 0;
 
     width: 100%;
     height: 100%;
@@ -230,65 +271,43 @@ html, body {
     left: 18px;
     right: 18px;
 
-    height: 65px;
-
-    z-index: 15;
+    z-index: 30;
 
     display: flex;
+
     justify-content: space-between;
 
     pointer-events: none;
 }
 
-
-/* 왼쪽 정보 */
-
 #leftInfo {
     display: flex;
     flex-direction: column;
-
     gap: 5px;
 }
-
-
-/* 오른쪽 정보 */
 
 #rightInfo {
     display: flex;
     align-items: flex-start;
 }
 
-
-/* 각각의 UI */
-
 .uiText {
     color: white;
-
-    font-size: 18px;
 
     text-shadow:
         0 0 7px
         rgba(255,255,255,0.3);
 }
 
-
-/* 스테이지 */
-
 #stage {
     font-size: 21px;
     font-weight: bold;
 }
 
-
-/* 적 수 */
-
 #enemyCount {
     font-size: 16px;
     color: #ddd;
 }
-
-
-/* 선 */
 
 #lineCount {
     font-size: 18px;
@@ -313,11 +332,13 @@ html, body {
     transform:
         translate(-50%, -50%);
 
-    z-index: 5;
+    z-index: 8;
 
     box-shadow:
         0 0 10px white,
         0 0 20px white;
+
+    pointer-events: none;
 }
 
 
@@ -338,10 +359,12 @@ html, body {
     transform:
         translate(-50%, -50%);
 
-    z-index: 4;
+    z-index: 7;
 
     box-shadow:
         0 0 10px #d33;
+
+    pointer-events: none;
 
     transition:
         opacity 0.08s;
@@ -365,6 +388,7 @@ html, body {
     height: 60px;
 
     border: none;
+
     border-radius: 15px;
 
     background: white;
@@ -374,7 +398,9 @@ html, body {
     font-size: 20px;
     font-weight: bold;
 
-    z-index: 20;
+    z-index: 50;
+
+    touch-action: manipulation;
 }
 
 #slashButton:active {
@@ -386,20 +412,17 @@ html, body {
 #slashButton:disabled {
     opacity: 0.5;
 }
-
 </style>
-
 </head>
 
 
 <body>
 
-
 <div id="game">
 
 
 <!-- ===================================================
-     메인 메뉴
+     메인 화면
 =================================================== -->
 
 <div id="startScreen">
@@ -410,15 +433,14 @@ html, body {
         Slash Game
     </div>
 
-    <button
-        id="startButton"
-        aria-label="게임 시작">
+    <button id="startButton"
+            type="button"
+            aria-label="게임 시작">
     </button>
 
-
-    <button
-        id="characterButton"
-        class="menuButton">
+    <button id="characterButton"
+            class="menuButton"
+            type="button">
 
         <div class="menuIcon">
             👤
@@ -430,10 +452,9 @@ html, body {
 
     </button>
 
-
-    <button
-        id="settingsButton"
-        class="menuButton">
+    <button id="settingsButton"
+            class="menuButton"
+            type="button">
 
         <div class="menuIcon">
             ⚙
@@ -454,33 +475,26 @@ html, body {
 
 <div id="gameScreen">
 
-
-    <!-- 게임 UI -->
-
     <div id="gameUI">
 
         <div id="leftInfo">
 
-            <div
-                id="stage"
-                class="uiText">
+            <div id="stage"
+                 class="uiText">
                 STAGE 1
             </div>
 
-            <div
-                id="enemyCount"
-                class="uiText">
+            <div id="enemyCount"
+                 class="uiText">
                 적 1
             </div>
 
         </div>
 
-
         <div id="rightInfo">
 
-            <div
-                id="lineCount"
-                class="uiText">
+            <div id="lineCount"
+                 class="uiText">
                 선 2 / 2
             </div>
 
@@ -493,12 +507,12 @@ html, body {
 
     <div id="player"></div>
 
-    <button id="slashButton">
+    <button id="slashButton"
+            type="button">
         ⚔ 베기
     </button>
 
 </div>
-
 
 </div>
 
@@ -506,58 +520,58 @@ html, body {
 <script>
 
 /* =====================================================
-   요소
+   DOM
 ===================================================== */
 
 const startScreen =
-document.getElementById("startScreen");
+    document.getElementById("startScreen");
 
 const gameScreen =
-document.getElementById("gameScreen");
+    document.getElementById("gameScreen");
 
 const startButton =
-document.getElementById("startButton");
+    document.getElementById("startButton");
 
 const characterButton =
-document.getElementById("characterButton");
+    document.getElementById("characterButton");
 
 const settingsButton =
-document.getElementById("settingsButton");
+    document.getElementById("settingsButton");
 
 const menuCanvas =
-document.getElementById("menuCanvas");
+    document.getElementById("menuCanvas");
 
 const menuCtx =
-menuCanvas.getContext("2d");
+    menuCanvas.getContext("2d");
 
 const canvas =
-document.getElementById("canvas");
+    document.getElementById("canvas");
 
 const ctx =
-canvas.getContext("2d");
+    canvas.getContext("2d");
 
 const player =
-document.getElementById("player");
+    document.getElementById("player");
 
 const slashButton =
-document.getElementById("slashButton");
+    document.getElementById("slashButton");
 
 const stageText =
-document.getElementById("stage");
+    document.getElementById("stage");
 
 const enemyCountText =
-document.getElementById("enemyCount");
+    document.getElementById("enemyCount");
 
 const lineCountText =
-document.getElementById("lineCount");
+    document.getElementById("lineCount");
 
 
 /* =====================================================
-   게임 변수
+   변수
 ===================================================== */
 
-let width;
-let height;
+let width = 0;
+let height = 0;
 
 let stage = 1;
 
@@ -586,31 +600,35 @@ let slashTrails = [];
 
 let effectAnimationRunning = false;
 
+let gameStarted = false;
+
 
 /* =====================================================
-   메인 메뉴 애니메이션
+   메뉴 애니메이션
 ===================================================== */
-
-let menuAnimationId;
 
 let menuObjects = [];
 
 let menuTime = 0;
 
 
-/*
-    메뉴 배경에 사용할 가짜 오브젝트 생성
-*/
+function resizeMenuCanvas() {
+
+    menuCanvas.width =
+        window.innerWidth;
+
+    menuCanvas.height =
+        window.innerHeight;
+}
+
 
 function createMenuObjects() {
 
     menuObjects = [];
 
-    const count = 9;
-
     for (
         let i = 0;
-        i < count;
+        i < 10;
         i++
     ) {
 
@@ -639,24 +657,16 @@ function createMenuObjects() {
             size:
                 2 +
                 Math.random() * 3
-
         });
-
     }
-
 }
 
 
-/*
-    메뉴 배경 그리기
-*/
-
 function animateMenu() {
 
-    menuAnimationId =
-        requestAnimationFrame(
-            animateMenu
-        );
+    requestAnimationFrame(
+        animateMenu
+    );
 
     menuTime += 0.01;
 
@@ -668,9 +678,7 @@ function animateMenu() {
     );
 
 
-    /*
-        아주 희미한 격자 느낌
-    */
+    /* 희미한 격자 */
 
     menuCtx.strokeStyle =
         "rgba(255,255,255,0.025)";
@@ -700,7 +708,6 @@ function animateMenu() {
         );
 
         menuCtx.stroke();
-
     }
 
 
@@ -723,13 +730,10 @@ function animateMenu() {
         );
 
         menuCtx.stroke();
-
     }
 
 
-    /*
-        움직이는 작은 점
-    */
+    /* 움직이는 점 */
 
     menuObjects.forEach(
         obj => {
@@ -745,7 +749,6 @@ function animateMenu() {
             ) {
 
                 obj.vx *= -1;
-
             }
 
 
@@ -756,17 +759,14 @@ function animateMenu() {
             ) {
 
                 obj.vy *= -1;
-
             }
 
 
             menuCtx.globalAlpha =
                 0.18;
 
-
             menuCtx.fillStyle =
                 "white";
-
 
             menuCtx.beginPath();
 
@@ -779,14 +779,11 @@ function animateMenu() {
             );
 
             menuCtx.fill();
-
         }
     );
 
 
-    /*
-        배경 검격
-    */
+    /* 배경 검격 */
 
     const wave =
         Math.sin(menuTime) * 30;
@@ -799,9 +796,7 @@ function animateMenu() {
         menuCanvas.height / 2 + 80
     );
 
-    menuCtx.rotate(
-        -0.2
-    );
+    menuCtx.rotate(-0.2);
 
     menuCtx.globalAlpha =
         0.07;
@@ -809,8 +804,7 @@ function animateMenu() {
     menuCtx.strokeStyle =
         "white";
 
-    menuCtx.lineWidth =
-        2;
+    menuCtx.lineWidth = 2;
 
     menuCtx.beginPath();
 
@@ -831,17 +825,17 @@ function animateMenu() {
     menuCtx.restore();
 
 
-    /*
-        배경의 작은 플레이어
-    */
+    /* 배경 플레이어 */
 
     const px =
         menuCanvas.width / 2 +
-        Math.sin(menuTime * 0.8) * 180;
+        Math.sin(menuTime * 0.8) *
+        180;
 
     const py =
         menuCanvas.height * 0.68 +
-        Math.cos(menuTime * 0.6) * 35;
+        Math.cos(menuTime * 0.6) *
+        35;
 
 
     menuCtx.globalAlpha =
@@ -863,9 +857,7 @@ function animateMenu() {
     menuCtx.fill();
 
 
-    /*
-        배경의 작은 적들
-    */
+    /* 배경 적 */
 
     for (
         let i = 0;
@@ -878,14 +870,16 @@ function animateMenu() {
             Math.cos(
                 menuTime * 0.5 +
                 i * 1.5
-            ) * (180 + i * 25);
+            ) *
+            (180 + i * 25);
 
         const ey =
             menuCanvas.height * 0.35 +
             Math.sin(
                 menuTime * 0.7 +
                 i
-            ) * 55;
+            ) *
+            55;
 
 
         menuCtx.globalAlpha =
@@ -905,30 +899,58 @@ function animateMenu() {
         );
 
         menuCtx.fill();
-
     }
 
 
     menuCtx.globalAlpha = 1;
-
-}
-
-
-/* 메뉴 Canvas 크기 */
-
-function resizeMenuCanvas() {
-
-    menuCanvas.width =
-        window.innerWidth;
-
-    menuCanvas.height =
-        window.innerHeight;
-
 }
 
 
 /* =====================================================
-   게임 초기화
+   게임 기본
+===================================================== */
+
+function resize() {
+
+    width =
+        window.innerWidth;
+
+    height =
+        window.innerHeight;
+
+
+    canvas.width =
+        width;
+
+    canvas.height =
+        height;
+
+
+    resetPlayerPosition();
+
+    draw();
+}
+
+
+function resetPlayerPosition() {
+
+    playerPos.x =
+        width / 2;
+
+    playerPos.y =
+        height * 0.72;
+
+
+    player.style.left =
+        playerPos.x + "px";
+
+    player.style.top =
+        playerPos.y + "px";
+}
+
+
+/* =====================================================
+   스테이지 난이도
 ===================================================== */
 
 function getEnemyCount() {
@@ -937,13 +959,18 @@ function getEnemyCount() {
         Math.floor(stage / 5);
 
     count =
-        Math.max(1, count);
+        Math.max(
+            1,
+            count
+        );
 
     count =
-        Math.min(7, count);
+        Math.min(
+            7,
+            count
+        );
 
     return count;
-
 }
 
 
@@ -957,19 +984,19 @@ function updateMaxLines() {
             2,
             enemyCount - 1
         );
-
 }
 
 
 function updateLineCount() {
 
     const remaining =
-        maxLines -
-        lines.length;
+        Math.max(
+            0,
+            maxLines - lines.length
+        );
 
     lineCountText.textContent =
         `선 ${remaining} / ${maxLines}`;
-
 }
 
 
@@ -986,74 +1013,14 @@ function updateEnemyCount() {
             ) {
 
                 alive++;
-
             }
-
         }
     );
 
+
     enemyCountText.textContent =
         `적 ${alive}`;
-
 }
-
-
-/* =====================================================
-   플레이어
-===================================================== */
-
-function resetPlayerPosition() {
-
-    playerPos.x =
-        width / 2;
-
-    playerPos.y =
-        height * 0.72;
-
-    player.style.left =
-        playerPos.x + "px";
-
-    player.style.top =
-        playerPos.y + "px";
-
-}
-
-
-/* =====================================================
-   Canvas 크기
-===================================================== */
-
-function resize() {
-
-    width =
-        window.innerWidth;
-
-    height =
-        window.innerHeight;
-
-    canvas.width =
-        width;
-
-    canvas.height =
-        height;
-
-    resetPlayerPosition();
-
-    draw();
-
-}
-
-
-window.addEventListener(
-    "resize",
-    function() {
-
-        resizeMenuCanvas();
-
-        resize();
-
-    }
-);
 
 
 /* =====================================================
@@ -1068,7 +1035,6 @@ function distance(a, b) {
         (a.y - b.y) ** 2
 
     );
-
 }
 
 
@@ -1087,26 +1053,25 @@ function pointOnLine(
         y:
             start.y +
             (end.y - start.y) * t
-
     };
-
 }
 
 
 /* =====================================================
-   정답 경로
+   정답 경로 생성
 ===================================================== */
 
 function generateSolutionPath() {
 
     solutionPath = [];
 
+
     let current = {
 
         x: playerPos.x,
         y: playerPos.y
-
     };
+
 
     const points = [
         current
@@ -1124,7 +1089,7 @@ function generateSolutionPath() {
 
         for (
             let attempt = 0;
-            attempt < 80;
+            attempt < 100;
             attempt++
         ) {
 
@@ -1139,7 +1104,6 @@ function generateSolutionPath() {
                     100 +
                     Math.random() *
                     (height * 0.48)
-
             };
 
 
@@ -1151,7 +1115,6 @@ function generateSolutionPath() {
             ) {
 
                 continue;
-
             }
 
 
@@ -1160,7 +1123,7 @@ function generateSolutionPath() {
 
             for (
                 let j = 0;
-                j < points.length - 1;
+                j < points.length;
                 j++
             ) {
 
@@ -1168,14 +1131,13 @@ function generateSolutionPath() {
                     distance(
                         points[j],
                         candidate
-                    ) < 110
+                    ) < 100
                 ) {
 
                     tooClose = true;
+
                     break;
-
                 }
-
             }
 
 
@@ -1184,8 +1146,8 @@ function generateSolutionPath() {
 
 
             next = candidate;
-            break;
 
+            break;
         }
 
 
@@ -1204,25 +1166,23 @@ function generateSolutionPath() {
                 x: next.x,
                 y: next.y
             }
-
         });
 
 
         points.push(next);
 
         current = next;
-
     }
 
 
     return true;
-
 }
 
 
 function getPathLength() {
 
     let total = 0;
+
 
     for (
         const segment of solutionPath
@@ -1233,11 +1193,10 @@ function getPathLength() {
                 segment.start,
                 segment.end
             );
-
     }
 
-    return total;
 
+    return total;
 }
 
 
@@ -1268,8 +1227,7 @@ function pointAtDistanceFromPath(
                 (
                     targetDistance -
                     passed
-                )
-                /
+                ) /
                 length;
 
 
@@ -1278,23 +1236,16 @@ function pointAtDistanceFromPath(
                 segment.end,
                 t
             );
-
         }
 
 
         passed += length;
-
     }
 
 
-    const last =
-        solutionPath[
-            solutionPath.length - 1
-        ];
-
-
-    return last.end;
-
+    return solutionPath[
+        solutionPath.length - 1
+    ].end;
 }
 
 
@@ -1312,6 +1263,7 @@ function generateEnemyPositions() {
 
     const positions = [];
 
+
     const minimumDistance = 90;
 
 
@@ -1324,7 +1276,6 @@ function generateEnemyPositions() {
         const baseRatio =
 
             0.10 +
-
             0.80 *
             (
                 (i + 0.5) /
@@ -1380,19 +1331,19 @@ function generateEnemyPositions() {
                 base.y +
                 Math.sin(angle) *
                 offset
-
         };
 
 
         if (
             position.x < 45 ||
-            position.x > width - 45 ||
+            position.x >
+            width - 45 ||
             position.y < 80 ||
-            position.y > height * 0.65
+            position.y >
+            height * 0.65
         ) {
 
             return null;
-
         }
 
 
@@ -1408,19 +1359,17 @@ function generateEnemyPositions() {
             ) {
 
                 return null;
-
             }
-
         }
 
 
-        positions.push(position);
-
+        positions.push(
+            position
+        );
     }
 
 
     return positions;
-
 }
 
 
@@ -1431,6 +1380,7 @@ function spawnEnemies() {
     );
 
     enemies = [];
+
 
     let positions = null;
 
@@ -1446,7 +1396,6 @@ function spawnEnemies() {
         ) {
 
             continue;
-
         }
 
 
@@ -1456,9 +1405,13 @@ function spawnEnemies() {
 
         if (positions)
             break;
-
     }
 
+
+    /*
+       극단적인 경우에도 스테이지가
+       생성되도록 하는 fallback
+    */
 
     if (!positions) {
 
@@ -1468,6 +1421,7 @@ function spawnEnemies() {
 
         const total =
             getPathLength();
+
 
         for (
             let i = 0;
@@ -1480,20 +1434,12 @@ function spawnEnemies() {
                 pointAtDistanceFromPath(
 
                     total *
-                    (
-                        i + 1
-                    )
-                    /
-                    (
-                        getEnemyCount() + 1
-                    )
+                    (i + 1) /
+                    (getEnemyCount() + 1)
 
                 )
-
             );
-
         }
-
     }
 
 
@@ -1505,546 +1451,35 @@ function spawnEnemies() {
                     "div"
                 );
 
-            enemy.classList.add(
-                "enemy"
-            );
+
+            enemy.className =
+                "enemy";
+
 
             enemy.style.left =
                 position.x + "px";
 
+
             enemy.style.top =
                 position.y + "px";
+
 
             gameScreen.appendChild(
                 enemy
             );
 
-            enemies.push(enemy);
 
+            enemies.push(enemy);
         }
     );
 
 
     updateEnemyCount();
-
 }
 
 
 /* =====================================================
-   터치
-===================================================== */
-
-function getTouchPosition(e) {
-
-    const touch =
-        e.touches[0];
-
-    return {
-
-        x: touch.clientX,
-        y: touch.clientY
-
-    };
-
-}
-
-
-gameScreen.addEventListener(
-    "touchstart",
-    function(e) {
-
-        if (attacking)
-            return;
-
-        if (
-            e.target ===
-            slashButton
-        )
-            return;
-
-        if (
-            lines.length >=
-            maxLines
-        )
-            return;
-
-
-        e.preventDefault();
-
-        dragging = true;
-
-        const pos =
-            getTouchPosition(e);
-
-
-        let start;
-
-
-        if (
-            lines.length === 0
-        ) {
-
-            start = {
-                x: playerPos.x,
-                y: playerPos.y
-            };
-
-        }
-        else {
-
-            const last =
-                lines[
-                    lines.length - 1
-                ];
-
-            start = {
-                x: last.end.x,
-                y: last.end.y
-            };
-
-        }
-
-
-        currentLine = {
-
-            start: start,
-            end: pos
-
-        };
-
-
-        draw();
-
-    },
-    {
-        passive: false
-    }
-);
-
-
-gameScreen.addEventListener(
-    "touchmove",
-    function(e) {
-
-        if (!dragging)
-            return;
-
-        e.preventDefault();
-
-        currentLine.end =
-            getTouchPosition(e);
-
-        draw();
-
-    },
-    {
-        passive: false
-    }
-);
-
-
-gameScreen.addEventListener(
-    "touchend",
-    function() {
-
-        if (!dragging)
-            return;
-
-        dragging = false;
-
-
-        if (currentLine) {
-
-            lines.push(
-                currentLine
-            );
-
-            currentLine = null;
-
-        }
-
-
-        updateLineCount();
-
-        draw();
-
-    }
-);
-
-
-/* =====================================================
-   이펙트
-===================================================== */
-
-function createEnemyExplosion(
-    x,
-    y
-) {
-
-    particles.push({
-
-        x,
-        y,
-
-        vx: 0,
-        vy: 0,
-
-        life: 18,
-        maxLife: 18,
-
-        size: 22,
-
-        type: "flash"
-
-    });
-
-
-    for (
-        let i = 0;
-        i < 18;
-        i++
-    ) {
-
-        const angle =
-            Math.random() *
-            Math.PI * 2;
-
-        const speed =
-            2 +
-            Math.random() * 5;
-
-
-        particles.push({
-
-            x,
-            y,
-
-            vx:
-                Math.cos(angle) *
-                speed,
-
-            vy:
-                Math.sin(angle) *
-                speed,
-
-            life:
-                25 +
-                Math.random() * 20,
-
-            maxLife: 45,
-
-            size:
-                2 +
-                Math.random() * 5,
-
-            type: "fragment"
-
-        });
-
-    }
-
-
-    startEffectAnimation();
-
-}
-
-
-function createSlashTrail(
-    x,
-    y,
-    angle
-) {
-
-    slashTrails.push({
-
-        x,
-        y,
-        angle,
-
-        life: 8,
-        maxLife: 8
-
-    });
-
-
-    startEffectAnimation();
-
-}
-
-
-function startEffectAnimation() {
-
-    if (effectAnimationRunning)
-        return;
-
-    effectAnimationRunning = true;
-
-    requestAnimationFrame(
-        updateEffects
-    );
-
-}
-
-
-function updateEffects() {
-
-    ctx.clearRect(
-        0,
-        0,
-        width,
-        height
-    );
-
-    drawLines();
-
-
-    /* 검격 */
-
-    for (
-        let i =
-            slashTrails.length - 1;
-        i >= 0;
-        i--
-    ) {
-
-        const trail =
-            slashTrails[i];
-
-        trail.life--;
-
-        const progress =
-            1 -
-            trail.life /
-            trail.maxLife;
-
-        const alpha =
-            trail.life /
-            trail.maxLife;
-
-
-        ctx.save();
-
-        ctx.translate(
-            trail.x,
-            trail.y
-        );
-
-        ctx.rotate(
-            trail.angle
-        );
-
-        ctx.strokeStyle =
-            "white";
-
-        ctx.lineCap =
-            "round";
-
-
-        ctx.globalAlpha =
-            alpha * 0.25;
-
-        ctx.lineWidth =
-            10 *
-            (1 - progress);
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            -65,
-            8
-        );
-
-        ctx.quadraticCurveTo(
-            -5,
-            -30,
-            65,
-            -5
-        );
-
-        ctx.stroke();
-
-
-        ctx.globalAlpha =
-            alpha * 0.8;
-
-        ctx.lineWidth =
-            5 *
-            (1 - progress * 0.5);
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            -60,
-            6
-        );
-
-        ctx.quadraticCurveTo(
-            0,
-            -25,
-            60,
-            -2
-        );
-
-        ctx.stroke();
-
-
-        ctx.globalAlpha =
-            alpha;
-
-        ctx.lineWidth = 2;
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            -52,
-            3
-        );
-
-        ctx.quadraticCurveTo(
-            0,
-            -21,
-            54,
-            -3
-        );
-
-        ctx.stroke();
-
-
-        ctx.restore();
-
-
-        if (
-            trail.life <= 0
-        ) {
-
-            slashTrails.splice(
-                i,
-                1
-            );
-
-        }
-
-    }
-
-
-    /* 폭발 */
-
-    for (
-        let i =
-            particles.length - 1;
-        i >= 0;
-        i--
-    ) {
-
-        const p =
-            particles[i];
-
-        p.x += p.vx;
-        p.y += p.vy;
-
-        p.vx *= 0.96;
-        p.vy *= 0.96;
-
-        p.life--;
-
-
-        ctx.globalAlpha =
-            p.life /
-            p.maxLife;
-
-
-        if (
-            p.type ===
-            "flash"
-        ) {
-
-            const size =
-                p.size *
-                (
-                    1 -
-                    p.life /
-                    p.maxLife
-                );
-
-
-            ctx.fillStyle =
-                "white";
-
-            ctx.beginPath();
-
-            ctx.arc(
-                p.x,
-                p.y,
-                size,
-                0,
-                Math.PI * 2
-            );
-
-            ctx.fill();
-
-        }
-        else {
-
-            ctx.fillStyle =
-                "#ff4444";
-
-            ctx.beginPath();
-
-            ctx.arc(
-                p.x,
-                p.y,
-                p.size,
-                0,
-                Math.PI * 2
-            );
-
-            ctx.fill();
-
-        }
-
-
-        if (
-            p.life <= 0
-        ) {
-
-            particles.splice(
-                i,
-                1
-            );
-
-        }
-
-    }
-
-
-    ctx.globalAlpha = 1;
-
-
-    if (
-        particles.length > 0 ||
-        slashTrails.length > 0
-    ) {
-
-        requestAnimationFrame(
-            updateEffects
-        );
-
-    }
-    else {
-
-        effectAnimationRunning =
-            false;
-
-    }
-
-}
-
-
-/* =====================================================
-   선
+   선 그리기
 ===================================================== */
 
 function drawLines() {
@@ -2053,9 +1488,11 @@ function drawLines() {
 
     ctx.lineWidth = 5;
 
-    ctx.lineCap = "round";
+    ctx.lineCap =
+        "round";
 
-    ctx.strokeStyle = "white";
+    ctx.strokeStyle =
+        "white";
 
 
     for (
@@ -2075,7 +1512,6 @@ function drawLines() {
         );
 
         ctx.stroke();
-
     }
 
 
@@ -2094,12 +1530,10 @@ function drawLines() {
         );
 
         ctx.stroke();
-
     }
 
 
     ctx.restore();
-
 }
 
 
@@ -2113,12 +1547,210 @@ function draw() {
     );
 
     drawLines();
-
 }
 
 
 /* =====================================================
-   적 피격
+   터치 → 좌표
+===================================================== */
+
+function getPointerPosition(e) {
+
+    return {
+
+        x: e.clientX,
+        y: e.clientY
+    };
+}
+
+
+/* =====================================================
+   선 그리기 입력
+===================================================== */
+
+gameScreen.addEventListener(
+    "pointerdown",
+    function(e) {
+
+        if (
+            !gameStarted ||
+            attacking
+        )
+            return;
+
+
+        if (
+            e.target === slashButton
+        )
+            return;
+
+
+        if (
+            lines.length >= maxLines
+        )
+            return;
+
+
+        dragging = true;
+
+
+        const pos =
+            getPointerPosition(e);
+
+
+        let start;
+
+
+        /*
+           첫 번째 선은 플레이어에서 시작
+        */
+
+        if (
+            lines.length === 0
+        ) {
+
+            start = {
+
+                x: playerPos.x,
+                y: playerPos.y
+            };
+
+        }
+
+        /*
+           두 번째 선부터는
+           이전 선의 끝에서 시작
+        */
+
+        else {
+
+            const last =
+                lines[
+                    lines.length - 1
+                ];
+
+
+            start = {
+
+                x: last.end.x,
+                y: last.end.y
+            };
+        }
+
+
+        currentLine = {
+
+            start: start,
+
+            end: {
+
+                x: pos.x,
+                y: pos.y
+            }
+        };
+
+
+        try {
+
+            gameScreen.setPointerCapture(
+                e.pointerId
+            );
+
+        }
+        catch(err) {}
+
+
+        draw();
+    }
+);
+
+
+gameScreen.addEventListener(
+    "pointermove",
+    function(e) {
+
+        if (
+            !dragging ||
+            !currentLine
+        )
+            return;
+
+
+        currentLine.end =
+            getPointerPosition(e);
+
+
+        draw();
+    }
+);
+
+
+function finishDrawing(e) {
+
+    if (!dragging)
+        return;
+
+
+    dragging = false;
+
+
+    try {
+
+        gameScreen.releasePointerCapture(
+            e.pointerId
+        );
+
+    }
+    catch(err) {}
+
+
+    if (
+        currentLine
+    ) {
+
+        const length =
+            distance(
+                currentLine.start,
+                currentLine.end
+            );
+
+
+        /*
+           너무 짧은 터치는 선으로 인정하지 않음
+        */
+
+        if (length > 20) {
+
+            lines.push(
+                currentLine
+            );
+        }
+
+
+        currentLine = null;
+    }
+
+
+    updateLineCount();
+
+    draw();
+}
+
+
+gameScreen.addEventListener(
+    "pointerup",
+    finishDrawing
+);
+
+
+gameScreen.addEventListener(
+    "pointercancel",
+    finishDrawing
+);
+
+
+/* =====================================================
+   선과 적 충돌
 ===================================================== */
 
 function pointToLineDistance(
@@ -2143,7 +1775,6 @@ function pointToLineDistance(
             p,
             a
         );
-
     }
 
 
@@ -2178,7 +1809,6 @@ function pointToLineDistance(
         y:
             a.y +
             clamped * dy
-
     };
 
 
@@ -2186,7 +1816,6 @@ function pointToLineDistance(
         p,
         closest
     );
-
 }
 
 
@@ -2204,7 +1833,6 @@ function checkEnemyHit(
             ) {
 
                 return;
-
             }
 
 
@@ -2221,7 +1849,6 @@ function checkEnemyHit(
                 y:
                     rect.top +
                     rect.height / 2
-
             };
 
 
@@ -2251,12 +1878,396 @@ function checkEnemyHit(
 
 
                 updateEnemyCount();
-
             }
-
         }
     );
+}
 
+
+/* =====================================================
+   이펙트
+===================================================== */
+
+function createEnemyExplosion(
+    x,
+    y
+) {
+
+    particles.push({
+
+        x: x,
+        y: y,
+
+        vx: 0,
+        vy: 0,
+
+        life: 18,
+        maxLife: 18,
+
+        size: 22,
+
+        type: "flash"
+    });
+
+
+    for (
+        let i = 0;
+        i < 18;
+        i++
+    ) {
+
+        const angle =
+            Math.random() *
+            Math.PI * 2;
+
+
+        const speed =
+            2 +
+            Math.random() * 5;
+
+
+        particles.push({
+
+            x: x,
+            y: y,
+
+            vx:
+                Math.cos(angle) *
+                speed,
+
+            vy:
+                Math.sin(angle) *
+                speed,
+
+            life:
+                25 +
+                Math.random() * 20,
+
+            maxLife: 45,
+
+            size:
+                2 +
+                Math.random() * 5,
+
+            type: "fragment"
+        });
+    }
+
+
+    startEffectAnimation();
+}
+
+
+function createSlashTrail(
+    x,
+    y,
+    angle
+) {
+
+    slashTrails.push({
+
+        x: x,
+        y: y,
+
+        angle: angle,
+
+        life: 8,
+        maxLife: 8
+    });
+
+
+    startEffectAnimation();
+}
+
+
+function startEffectAnimation() {
+
+    if (
+        effectAnimationRunning
+    )
+        return;
+
+
+    effectAnimationRunning =
+        true;
+
+
+    requestAnimationFrame(
+        updateEffects
+    );
+}
+
+
+function updateEffects() {
+
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    drawLines();
+
+
+    /* 검격 */
+
+    for (
+        let i =
+            slashTrails.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const trail =
+            slashTrails[i];
+
+
+        trail.life--;
+
+
+        const progress =
+            1 -
+            trail.life /
+            trail.maxLife;
+
+
+        const alpha =
+            trail.life /
+            trail.maxLife;
+
+
+        ctx.save();
+
+
+        ctx.translate(
+            trail.x,
+            trail.y
+        );
+
+
+        ctx.rotate(
+            trail.angle
+        );
+
+
+        ctx.strokeStyle =
+            "white";
+
+
+        ctx.lineCap =
+            "round";
+
+
+        /* 바깥쪽 */
+
+        ctx.globalAlpha =
+            alpha * 0.25;
+
+
+        ctx.lineWidth =
+            10 *
+            (1 - progress);
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            -65,
+            8
+        );
+
+        ctx.quadraticCurveTo(
+            -5,
+            -30,
+            65,
+            -5
+        );
+
+        ctx.stroke();
+
+
+        /* 중앙 */
+
+        ctx.globalAlpha =
+            alpha * 0.8;
+
+
+        ctx.lineWidth =
+            5 *
+            (1 -
+                progress * 0.5);
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            -60,
+            6
+        );
+
+        ctx.quadraticCurveTo(
+            0,
+            -25,
+            60,
+            -2
+        );
+
+        ctx.stroke();
+
+
+        /* 날카로운 중심선 */
+
+        ctx.globalAlpha =
+            alpha;
+
+
+        ctx.lineWidth = 2;
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            -52,
+            3
+        );
+
+        ctx.quadraticCurveTo(
+            0,
+            -21,
+            54,
+            -3
+        );
+
+        ctx.stroke();
+
+
+        ctx.restore();
+
+
+        if (
+            trail.life <= 0
+        ) {
+
+            slashTrails.splice(
+                i,
+                1
+            );
+        }
+    }
+
+
+    /* 적 폭발 */
+
+    for (
+        let i =
+            particles.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const p =
+            particles[i];
+
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+
+        p.vx *= 0.96;
+        p.vy *= 0.96;
+
+
+        p.life--;
+
+
+        ctx.globalAlpha =
+            p.life /
+            p.maxLife;
+
+
+        if (
+            p.type ===
+            "flash"
+        ) {
+
+            const size =
+                p.size *
+                (
+                    1 -
+                    p.life /
+                    p.maxLife
+                );
+
+
+            ctx.fillStyle =
+                "white";
+
+
+            ctx.beginPath();
+
+            ctx.arc(
+                p.x,
+                p.y,
+                size,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+        }
+        else {
+
+            ctx.fillStyle =
+                "#ff4444";
+
+
+            ctx.beginPath();
+
+            ctx.arc(
+                p.x,
+                p.y,
+                p.size,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+        }
+
+
+        if (
+            p.life <= 0
+        ) {
+
+            particles.splice(
+                i,
+                1
+            );
+        }
+    }
+
+
+    ctx.globalAlpha = 1;
+
+
+    if (
+        particles.length > 0 ||
+        slashTrails.length > 0
+    ) {
+
+        requestAnimationFrame(
+            updateEffects
+        );
+
+    }
+    else {
+
+        effectAnimationRunning =
+            false;
+    }
 }
 
 
@@ -2265,2661 +2276,30 @@ function checkEnemyHit(
 ===================================================== */
 
 slashButton.addEventListener(
-    "click",
-    function() {
-
-        if (attacking)
-            return;
-
-        if (
-            lines.length === 0
-        )
-            return;
-
-
-        attacking = true;
-
-        slashButton.disabled =
-            true;
-
-        moveAlongPath(0);
-
-    }
-);
-
-
-function moveAlongPath(index) {
-
-    if (
-        index >=
-        lines.length
-    ) {
-
-        setTimeout(
-            finishAttack,
-            100
-        );
-
-        return;
-
-    }
-
-
-    const line =
-        lines[index];
-
-    const start =
-        line.start;
-
-    const end =
-        line.end;
-
-
-    const duration = 120;
-
-    const startTime =
-        performance.now();
-
-
-    let previousX =
-        start.x;
-
-    let previousY =
-        start.y;
-
-
-    function animate(time) {
-
-        const progress =
-            Math.min(
-
-                (
-                    time -
-                    startTime
-                )
-                /
-                duration,
-
-                1
-
-            );
-
-
-        playerPos.x =
-            start.x +
-            (
-                end.x -
-                start.x
-            ) *
-            progress;
-
-
-        playerPos.y =
-            start.y +
-            (
-                end.y -
-                start.y
-            ) *
-            progress;
-
-
-        player.style.left =
-            playerPos.x + "px";
-
-        player.style.top =
-            playerPos.y + "px";
-
-
-        const angle =
-            Math.atan2(
-
-                playerPos.y -
-                previousY,
-
-                playerPos.x -
-                previousX
-
-            );
-
-
-        createSlashTrail(
-            playerPos.x,
-            playerPos.y,
-            angle
-        );
-
-
-        checkEnemyHit(
-
-            start,
-
-            {
-                x: playerPos.x,
-                y: playerPos.y
-            }
-
-        );
-
-
-        previousX =
-            playerPos.x;
-
-        previousY =
-            playerPos.y;
-
-
-        if (
-            progress < 1
-        ) {
-
-            requestAnimationFrame(
-                animate
-            );
-
-        }
-        else {
-
-            moveAlongPath(
-                index + 1
-            );
-
-        }
-
-    }
-
-
-    requestAnimationFrame(
-        animate
-    );
-
-}
-
-
-/* =====================================================
-   공격 종료
-===================================================== */
-
-function finishAttack() {
-
-    let alive = 0;
-
-
-    enemies.forEach(
-        enemy => {
-
-            if (
-                enemy.style.display !==
-                "none"
-            ) {
-
-                alive++;
-
-            }
-
-        }
-    );
-
-
-    attacking = false;
-
-
-    if (
-        alive === 0
-    ) {
-
-        setTimeout(
-            nextStage,
-            300
-        );
-
-    }
-    else {
-
-        setTimeout(
-            restartStage,
-            300
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   실패 → 같은 스테이지
-===================================================== */
-
-function restartStage() {
-
-    lines = [];
-
-    currentLine = null;
-
-
-    resetPlayerPosition();
-
-
-    enemies.forEach(
-        enemy => {
-
-            enemy.style.display =
-                "block";
-
-            enemy.style.opacity =
-                "1";
-
-        }
-    );
-
-
-    particles = [];
-
-    slashTrails = [];
-
-
-    updateEnemyCount();
-
-    updateLineCount();
-
-    draw();
-
-
-    slashButton.disabled =
-        false;
-
-    attacking = false;
-
-}
-
-
-/* =====================================================
-   다음 스테이지
-===================================================== */
-
-function nextStage() {
-
-    stage++;
-
-
-    stageText.textContent =
-        "STAGE " + stage;
-
-
-    resetPlayerPosition();
-
-
-    lines = [];
-
-    currentLine = null;
-
-
-    updateMaxLines();
-
-
-    spawnEnemies();
-
-
-    particles = [];
-
-    slashTrails = [];
-
-
-    updateEnemyCount();
-
-    updateLineCount();
-
-    draw();
-
-
-    slashButton.disabled =
-        false;
-
-    attacking = false;
-
-}
-
-
-/* =====================================================
-   게임 시작
-===================================================== */
-
-startButton.addEventListener(
     "pointerdown",
     function(e) {
 
         e.preventDefault();
         e.stopPropagation();
 
-        // 이미 게임 화면이면 무시
-        if (gameScreen.style.display === "block") {
-            return;
-        }
-
-        // 메뉴 숨기기
-        startScreen.style.display = "none";
-
-        // 게임 화면 표시
-        gameScreen.style.display = "block";
-
-        // 게임 초기화
-        stage = 1;
-
-        stageText.textContent =
-            "STAGE 1";
-
-        lines = [];
-
-        currentLine = null;
-
-        particles = [];
-
-        slashTrails = [];
-
-        attacking = false;
-
-        dragging = false;
-
-        // 화면 크기 계산
-        resize();
-
-        // 선 개수 설정
-        updateMaxLines();
-
-        // 적 생성
-        spawnEnemies();
-
-        // UI 갱신
-        updateEnemyCount();
-
-        updateLineCount();
-
-        // 화면 그리기
-        draw();
-
-        slashButton.disabled = false;
-
-    },
-    {
-        passive: false
     }
 );
 
-
-/* =====================================================
-   아직 기능 없는 버튼
-===================================================== */
-
-characterButton.addEventListener(
-    "click",
-    function(e) {
-
-        e.preventDefault();
-
-    }
-);
-
-
-settingsButton.addEventListener(
-    "click",
-    function(e) {
-
-        e.preventDefault();
-
-    }
-);
-
-
-/* =====================================================
-   초기화
-===================================================== */
-
-resizeMenuCanvas();
-
-createMenuObjects();
-
-animateMenu();    background: #050505;
-    overflow: hidden;
-}
-
-
-/* =====================================================
-   메인 메뉴
-===================================================== */
-
-#startScreen {
-    position: absolute;
-    inset: 0;
-    background: #050505;
-    z-index: 100;
-    overflow: hidden;
-}
-
-
-/* 메뉴 배경 */
-
-#menuCanvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-}
-
-
-/* 제목 */
-
-#gameTitle {
-    position: absolute;
-    top: 17%;
-    left: 0;
-    width: 100%;
-
-    text-align: center;
-
-    color: white;
-    font-size: 42px;
-    font-weight: bold;
-    letter-spacing: 3px;
-
-    z-index: 10;
-
-    text-shadow:
-        0 0 15px rgba(255,255,255,0.25);
-}
-
-
-/* 시작 버튼 */
-
-#startButton {
-    position: absolute;
-
-    left: 50%;
-    top: 50%;
-
-    transform:
-        translate(-50%, -50%);
-
-    width: 90px;
-    height: 90px;
-
-    border: none;
-    background: white;
-
-    /* 실제 버튼 영역은 90×90 */
-    /* 보이는 부분만 삼각형으로 자름 */
-    clip-path: polygon(
-        25% 10%,
-        25% 90%,
-        90% 50%
-    );
-
-    z-index: 20;
-
-    filter:
-        drop-shadow(
-            0 0 10px
-            rgba(255,255,255,0.5)
-        );
-
-    transition:
-        transform 0.12s;
-    
-    cursor: pointer;
-}
-
-
-/* 눌렀을 때 */
-
-#startButton:active {
-    transform:
-        translate(-50%, -50%)
-        scale(0.85);
-}
-
-#startButton:active {
-    transform:
-        translate(-50%, -50%)
-        scale(0.85);
-}
-
-
-/* 좌우 메뉴 버튼 */
-
-.menuButton {
-    position: absolute;
-
-    bottom: 16%;
-
-    width: 85px;
-    height: 85px;
-
-    border: none;
-    background: transparent;
-
-    color: white;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    gap: 7px;
-
-    font-size: 14px;
-
-    z-index: 20;
-}
-
-#characterButton {
-    left: 15%;
-}
-
-#settingsButton {
-    right: 15%;
-}
-
-.menuIcon {
-    width: 46px;
-    height: 46px;
-
-    border: 2px solid #777;
-    border-radius: 12px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 23px;
-
-    color: #ccc;
-
-    background:
-        rgba(255,255,255,0.02);
-}
-
-
-/* =====================================================
-   게임 화면
-===================================================== */
-
-#gameScreen {
-    position: absolute;
-    inset: 0;
-
-    display: none;
-
-    background: #050505;
-}
-
-
-/* 게임용 Canvas */
-
-#canvas {
-    position: absolute;
-
-    left: 0;
-    top: 0;
-
-    width: 100%;
-    height: 100%;
-
-    z-index: 6;
-
-    pointer-events: none;
-}
-
-
-/* =====================================================
-   게임 UI
-===================================================== */
-
-#gameUI {
-    position: absolute;
-
-    top: 18px;
-    left: 18px;
-    right: 18px;
-
-    height: 65px;
-
-    z-index: 15;
-
-    display: flex;
-    justify-content: space-between;
-
-    pointer-events: none;
-}
-
-
-/* 왼쪽 정보 */
-
-#leftInfo {
-    display: flex;
-    flex-direction: column;
-
-    gap: 5px;
-}
-
-
-/* 오른쪽 정보 */
-
-#rightInfo {
-    display: flex;
-    align-items: flex-start;
-}
-
-
-/* 각각의 UI */
-
-.uiText {
-    color: white;
-
-    font-size: 18px;
-
-    text-shadow:
-        0 0 7px
-        rgba(255,255,255,0.3);
-}
-
-
-/* 스테이지 */
-
-#stage {
-    font-size: 21px;
-    font-weight: bold;
-}
-
-
-/* 적 수 */
-
-#enemyCount {
-    font-size: 16px;
-    color: #ddd;
-}
-
-
-/* 선 */
-
-#lineCount {
-    font-size: 18px;
-    color: #ddd;
-}
-
-
-/* =====================================================
-   플레이어
-===================================================== */
-
-#player {
-    position: absolute;
-
-    width: 35px;
-    height: 35px;
-
-    border-radius: 50%;
-
-    background: white;
-
-    transform:
-        translate(-50%, -50%);
-
-    z-index: 5;
-
-    box-shadow:
-        0 0 10px white,
-        0 0 20px white;
-}
-
-
-/* =====================================================
-   적
-===================================================== */
-
-.enemy {
-    position: absolute;
-
-    width: 40px;
-    height: 40px;
-
-    border-radius: 50%;
-
-    background: #d33;
-
-    transform:
-        translate(-50%, -50%);
-
-    z-index: 4;
-
-    box-shadow:
-        0 0 10px #d33;
-
-    transition:
-        opacity 0.08s;
-}
-
-
-/* =====================================================
-   베기 버튼
-===================================================== */
-
-#slashButton {
-    position: absolute;
-
-    left: 50%;
-    bottom: 25px;
-
-    transform:
-        translateX(-50%);
-
-    width: 150px;
-    height: 60px;
-
-    border: none;
-    border-radius: 15px;
-
-    background: white;
-
-    color: black;
-
-    font-size: 20px;
-    font-weight: bold;
-
-    z-index: 20;
-}
-
-#slashButton:active {
-    transform:
-        translateX(-50%)
-        scale(0.95);
-}
-
-#slashButton:disabled {
-    opacity: 0.5;
-}
-
-</style>
-
-</head>
-
-
-<body>
-
-
-<div id="game">
-
-
-<!-- ===================================================
-     메인 메뉴
-=================================================== -->
-
-<div id="startScreen">
-
-    <canvas id="menuCanvas"></canvas>
-
-    <div id="gameTitle">
-        Slash Game
-    </div>
-
-    <button
-        id="startButton"
-        aria-label="게임 시작">
-    </button>
-
-
-    <button
-        id="characterButton"
-        class="menuButton">
-
-        <div class="menuIcon">
-            👤
-        </div>
-
-        <div>
-            캐릭터
-        </div>
-
-    </button>
-
-
-    <button
-        id="settingsButton"
-        class="menuButton">
-
-        <div class="menuIcon">
-            ⚙
-        </div>
-
-        <div>
-            설정
-        </div>
-
-    </button>
-
-</div>
-
-
-<!-- ===================================================
-     게임
-=================================================== -->
-
-<div id="gameScreen">
-
-
-    <!-- 게임 UI -->
-
-    <div id="gameUI">
-
-        <div id="leftInfo">
-
-            <div
-                id="stage"
-                class="uiText">
-                STAGE 1
-            </div>
-
-            <div
-                id="enemyCount"
-                class="uiText">
-                적 1
-            </div>
-
-        </div>
-
-
-        <div id="rightInfo">
-
-            <div
-                id="lineCount"
-                class="uiText">
-                선 2 / 2
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <canvas id="canvas"></canvas>
-
-    <div id="player"></div>
-
-    <button id="slashButton">
-        ⚔ 베기
-    </button>
-
-</div>
-
-
-</div>
-
-
-<script>
-
-/* =====================================================
-   요소
-===================================================== */
-
-const startScreen =
-document.getElementById("startScreen");
-
-const gameScreen =
-document.getElementById("gameScreen");
-
-const startButton =
-document.getElementById("startButton");
-
-const characterButton =
-document.getElementById("characterButton");
-
-const settingsButton =
-document.getElementById("settingsButton");
-
-const menuCanvas =
-document.getElementById("menuCanvas");
-
-const menuCtx =
-menuCanvas.getContext("2d");
-
-const canvas =
-document.getElementById("canvas");
-
-const ctx =
-canvas.getContext("2d");
-
-const player =
-document.getElementById("player");
-
-const slashButton =
-document.getElementById("slashButton");
-
-const stageText =
-document.getElementById("stage");
-
-const enemyCountText =
-document.getElementById("enemyCount");
-
-const lineCountText =
-document.getElementById("lineCount");
-
-
-/* =====================================================
-   게임 변수
-===================================================== */
-
-let width;
-let height;
-
-let stage = 1;
-
-let playerPos = {
-    x: 0,
-    y: 0
-};
-
-let enemies = [];
-
-let lines = [];
-
-let currentLine = null;
-
-let dragging = false;
-
-let attacking = false;
-
-let maxLines = 2;
-
-let solutionPath = [];
-
-let particles = [];
-
-let slashTrails = [];
-
-let effectAnimationRunning = false;
-
-
-/* =====================================================
-   메인 메뉴 애니메이션
-===================================================== */
-
-let menuAnimationId;
-
-let menuObjects = [];
-
-let menuTime = 0;
-
-
-/*
-    메뉴 배경에 사용할 가짜 오브젝트 생성
-*/
-
-function createMenuObjects() {
-
-    menuObjects = [];
-
-    const count = 9;
-
-    for (
-        let i = 0;
-        i < count;
-        i++
-    ) {
-
-        menuObjects.push({
-
-            x:
-                Math.random() *
-                window.innerWidth,
-
-            y:
-                100 +
-                Math.random() *
-                window.innerHeight *
-                0.65,
-
-            vx:
-                (
-                    Math.random() - 0.5
-                ) * 0.25,
-
-            vy:
-                (
-                    Math.random() - 0.5
-                ) * 0.25,
-
-            size:
-                2 +
-                Math.random() * 3
-
-        });
-
-    }
-
-}
-
-
-/*
-    메뉴 배경 그리기
-*/
-
-function animateMenu() {
-
-    menuAnimationId =
-        requestAnimationFrame(
-            animateMenu
-        );
-
-    menuTime += 0.01;
-
-    menuCtx.clearRect(
-        0,
-        0,
-        menuCanvas.width,
-        menuCanvas.height
-    );
-
-
-    /*
-        아주 희미한 격자 느낌
-    */
-
-    menuCtx.strokeStyle =
-        "rgba(255,255,255,0.025)";
-
-    menuCtx.lineWidth = 1;
-
-
-    const gridSize = 80;
-
-
-    for (
-        let x = 0;
-        x < menuCanvas.width;
-        x += gridSize
-    ) {
-
-        menuCtx.beginPath();
-
-        menuCtx.moveTo(
-            x,
-            0
-        );
-
-        menuCtx.lineTo(
-            x,
-            menuCanvas.height
-        );
-
-        menuCtx.stroke();
-
-    }
-
-
-    for (
-        let y = 0;
-        y < menuCanvas.height;
-        y += gridSize
-    ) {
-
-        menuCtx.beginPath();
-
-        menuCtx.moveTo(
-            0,
-            y
-        );
-
-        menuCtx.lineTo(
-            menuCanvas.width,
-            y
-        );
-
-        menuCtx.stroke();
-
-    }
-
-
-    /*
-        움직이는 작은 점
-    */
-
-    menuObjects.forEach(
-        obj => {
-
-            obj.x += obj.vx;
-            obj.y += obj.vy;
-
-
-            if (
-                obj.x < -20 ||
-                obj.x >
-                menuCanvas.width + 20
-            ) {
-
-                obj.vx *= -1;
-
-            }
-
-
-            if (
-                obj.y < 80 ||
-                obj.y >
-                menuCanvas.height - 100
-            ) {
-
-                obj.vy *= -1;
-
-            }
-
-
-            menuCtx.globalAlpha =
-                0.18;
-
-
-            menuCtx.fillStyle =
-                "white";
-
-
-            menuCtx.beginPath();
-
-            menuCtx.arc(
-                obj.x,
-                obj.y,
-                obj.size,
-                0,
-                Math.PI * 2
-            );
-
-            menuCtx.fill();
-
-        }
-    );
-
-
-    /*
-        배경 검격
-    */
-
-    const wave =
-        Math.sin(menuTime) * 30;
-
-
-    menuCtx.save();
-
-    menuCtx.translate(
-        menuCanvas.width / 2,
-        menuCanvas.height / 2 + 80
-    );
-
-    menuCtx.rotate(
-        -0.2
-    );
-
-    menuCtx.globalAlpha =
-        0.07;
-
-    menuCtx.strokeStyle =
-        "white";
-
-    menuCtx.lineWidth =
-        2;
-
-    menuCtx.beginPath();
-
-    menuCtx.moveTo(
-        -250,
-        wave
-    );
-
-    menuCtx.quadraticCurveTo(
-        0,
-        -100 + wave,
-        250,
-        wave
-    );
-
-    menuCtx.stroke();
-
-    menuCtx.restore();
-
-
-    /*
-        배경의 작은 플레이어
-    */
-
-    const px =
-        menuCanvas.width / 2 +
-        Math.sin(menuTime * 0.8) * 180;
-
-    const py =
-        menuCanvas.height * 0.68 +
-        Math.cos(menuTime * 0.6) * 35;
-
-
-    menuCtx.globalAlpha =
-        0.12;
-
-    menuCtx.fillStyle =
-        "white";
-
-    menuCtx.beginPath();
-
-    menuCtx.arc(
-        px,
-        py,
-        9,
-        0,
-        Math.PI * 2
-    );
-
-    menuCtx.fill();
-
-
-    /*
-        배경의 작은 적들
-    */
-
-    for (
-        let i = 0;
-        i < 4;
-        i++
-    ) {
-
-        const ex =
-            menuCanvas.width / 2 +
-            Math.cos(
-                menuTime * 0.5 +
-                i * 1.5
-            ) * (180 + i * 25);
-
-        const ey =
-            menuCanvas.height * 0.35 +
-            Math.sin(
-                menuTime * 0.7 +
-                i
-            ) * 55;
-
-
-        menuCtx.globalAlpha =
-            0.08;
-
-        menuCtx.fillStyle =
-            "#ff4444";
-
-        menuCtx.beginPath();
-
-        menuCtx.arc(
-            ex,
-            ey,
-            8,
-            0,
-            Math.PI * 2
-        );
-
-        menuCtx.fill();
-
-    }
-
-
-    menuCtx.globalAlpha = 1;
-
-}
-
-
-/* 메뉴 Canvas 크기 */
-
-function resizeMenuCanvas() {
-
-    menuCanvas.width =
-        window.innerWidth;
-
-    menuCanvas.height =
-        window.innerHeight;
-
-}
-
-
-/* =====================================================
-   게임 초기화
-===================================================== */
-
-function getEnemyCount() {
-
-    let count =
-        Math.floor(stage / 5);
-
-    count =
-        Math.max(1, count);
-
-    count =
-        Math.min(7, count);
-
-    return count;
-
-}
-
-
-function updateMaxLines() {
-
-    const enemyCount =
-        getEnemyCount();
-
-    maxLines =
-        Math.max(
-            2,
-            enemyCount - 1
-        );
-
-}
-
-
-function updateLineCount() {
-
-    const remaining =
-        maxLines -
-        lines.length;
-
-    lineCountText.textContent =
-        `선 ${remaining} / ${maxLines}`;
-
-}
-
-
-function updateEnemyCount() {
-
-    let alive = 0;
-
-    enemies.forEach(
-        enemy => {
-
-            if (
-                enemy.style.display !==
-                "none"
-            ) {
-
-                alive++;
-
-            }
-
-        }
-    );
-
-    enemyCountText.textContent =
-        `적 ${alive}`;
-
-}
-
-
-/* =====================================================
-   플레이어
-===================================================== */
-
-function resetPlayerPosition() {
-
-    playerPos.x =
-        width / 2;
-
-    playerPos.y =
-        height * 0.72;
-
-    player.style.left =
-        playerPos.x + "px";
-
-    player.style.top =
-        playerPos.y + "px";
-
-}
-
-
-/* =====================================================
-   Canvas 크기
-===================================================== */
-
-function resize() {
-
-    width =
-        window.innerWidth;
-
-    height =
-        window.innerHeight;
-
-    canvas.width =
-        width;
-
-    canvas.height =
-        height;
-
-    resetPlayerPosition();
-
-    draw();
-
-}
-
-
-window.addEventListener(
-    "resize",
-    function() {
-
-        resizeMenuCanvas();
-
-        resize();
-
-    }
-);
-
-
-/* =====================================================
-   수학
-===================================================== */
-
-function distance(a, b) {
-
-    return Math.sqrt(
-
-        (a.x - b.x) ** 2 +
-        (a.y - b.y) ** 2
-
-    );
-
-}
-
-
-function pointOnLine(
-    start,
-    end,
-    t
-) {
-
-    return {
-
-        x:
-            start.x +
-            (end.x - start.x) * t,
-
-        y:
-            start.y +
-            (end.y - start.y) * t
-
-    };
-
-}
-
-
-/* =====================================================
-   정답 경로
-===================================================== */
-
-function generateSolutionPath() {
-
-    solutionPath = [];
-
-    let current = {
-
-        x: playerPos.x,
-        y: playerPos.y
-
-    };
-
-    const points = [
-        current
-    ];
-
-
-    for (
-        let i = 0;
-        i < maxLines;
-        i++
-    ) {
-
-        let next = null;
-
-
-        for (
-            let attempt = 0;
-            attempt < 80;
-            attempt++
-        ) {
-
-            const candidate = {
-
-                x:
-                    70 +
-                    Math.random() *
-                    (width - 140),
-
-                y:
-                    100 +
-                    Math.random() *
-                    (height * 0.48)
-
-            };
-
-
-            if (
-                distance(
-                    current,
-                    candidate
-                ) < 130
-            ) {
-
-                continue;
-
-            }
-
-
-            let tooClose = false;
-
-
-            for (
-                let j = 0;
-                j < points.length - 1;
-                j++
-            ) {
-
-                if (
-                    distance(
-                        points[j],
-                        candidate
-                    ) < 110
-                ) {
-
-                    tooClose = true;
-                    break;
-
-                }
-
-            }
-
-
-            if (tooClose)
-                continue;
-
-
-            next = candidate;
-            break;
-
-        }
-
-
-        if (!next)
-            return false;
-
-
-        solutionPath.push({
-
-            start: {
-                x: current.x,
-                y: current.y
-            },
-
-            end: {
-                x: next.x,
-                y: next.y
-            }
-
-        });
-
-
-        points.push(next);
-
-        current = next;
-
-    }
-
-
-    return true;
-
-}
-
-
-function getPathLength() {
-
-    let total = 0;
-
-    for (
-        const segment of solutionPath
-    ) {
-
-        total +=
-            distance(
-                segment.start,
-                segment.end
-            );
-
-    }
-
-    return total;
-
-}
-
-
-function pointAtDistanceFromPath(
-    targetDistance
-) {
-
-    let passed = 0;
-
-
-    for (
-        const segment of solutionPath
-    ) {
-
-        const length =
-            distance(
-                segment.start,
-                segment.end
-            );
-
-
-        if (
-            targetDistance <=
-            passed + length
-        ) {
-
-            const t =
-                (
-                    targetDistance -
-                    passed
-                )
-                /
-                length;
-
-
-            return pointOnLine(
-                segment.start,
-                segment.end,
-                t
-            );
-
-        }
-
-
-        passed += length;
-
-    }
-
-
-    const last =
-        solutionPath[
-            solutionPath.length - 1
-        ];
-
-
-    return last.end;
-
-}
-
-
-/* =====================================================
-   적 배치
-===================================================== */
-
-function generateEnemyPositions() {
-
-    const count =
-        getEnemyCount();
-
-    const totalLength =
-        getPathLength();
-
-    const positions = [];
-
-    const minimumDistance = 90;
-
-
-    for (
-        let i = 0;
-        i < count;
-        i++
-    ) {
-
-        const baseRatio =
-
-            0.10 +
-
-            0.80 *
-            (
-                (i + 0.5) /
-                count
-            );
-
-
-        let ratio =
-            baseRatio +
-            (
-                Math.random() - 0.5
-            ) *
-            Math.min(
-                0.045,
-                0.20 / count
-            );
-
-
-        ratio =
-            Math.max(
-                0.10,
-                Math.min(
-                    0.90,
-                    ratio
-                )
-            );
-
-
-        const base =
-            pointAtDistanceFromPath(
-                totalLength * ratio
-            );
-
-
-        const angle =
-            Math.random() *
-            Math.PI * 2;
-
-
-        const offset =
-            5 +
-            Math.random() * 15;
-
-
-        const position = {
-
-            x:
-                base.x +
-                Math.cos(angle) *
-                offset,
-
-            y:
-                base.y +
-                Math.sin(angle) *
-                offset
-
-        };
-
-
-        if (
-            position.x < 45 ||
-            position.x > width - 45 ||
-            position.y < 80 ||
-            position.y > height * 0.65
-        ) {
-
-            return null;
-
-        }
-
-
-        for (
-            const other of positions
-        ) {
-
-            if (
-                distance(
-                    position,
-                    other
-                ) < minimumDistance
-            ) {
-
-                return null;
-
-            }
-
-        }
-
-
-        positions.push(position);
-
-    }
-
-
-    return positions;
-
-}
-
-
-function spawnEnemies() {
-
-    enemies.forEach(
-        enemy => enemy.remove()
-    );
-
-    enemies = [];
-
-    let positions = null;
-
-
-    for (
-        let attempt = 0;
-        attempt < 500;
-        attempt++
-    ) {
-
-        if (
-            !generateSolutionPath()
-        ) {
-
-            continue;
-
-        }
-
-
-        positions =
-            generateEnemyPositions();
-
-
-        if (positions)
-            break;
-
-    }
-
-
-    if (!positions) {
-
-        generateSolutionPath();
-
-        positions = [];
-
-        const total =
-            getPathLength();
-
-        for (
-            let i = 0;
-            i < getEnemyCount();
-            i++
-        ) {
-
-            positions.push(
-
-                pointAtDistanceFromPath(
-
-                    total *
-                    (
-                        i + 1
-                    )
-                    /
-                    (
-                        getEnemyCount() + 1
-                    )
-
-                )
-
-            );
-
-        }
-
-    }
-
-
-    positions.forEach(
-        position => {
-
-            const enemy =
-                document.createElement(
-                    "div"
-                );
-
-            enemy.classList.add(
-                "enemy"
-            );
-
-            enemy.style.left =
-                position.x + "px";
-
-            enemy.style.top =
-                position.y + "px";
-
-            gameScreen.appendChild(
-                enemy
-            );
-
-            enemies.push(enemy);
-
-        }
-    );
-
-
-    updateEnemyCount();
-
-}
-
-
-/* =====================================================
-   터치
-===================================================== */
-
-function getTouchPosition(e) {
-
-    const touch =
-        e.touches[0];
-
-    return {
-
-        x: touch.clientX,
-        y: touch.clientY
-
-    };
-
-}
-
-
-gameScreen.addEventListener(
-    "touchstart",
-    function(e) {
-
-        if (attacking)
-            return;
-
-        if (
-            e.target ===
-            slashButton
-        )
-            return;
-
-        if (
-            lines.length >=
-            maxLines
-        )
-            return;
-
-
-        e.preventDefault();
-
-        dragging = true;
-
-        const pos =
-            getTouchPosition(e);
-
-
-        let start;
-
-
-        if (
-            lines.length === 0
-        ) {
-
-            start = {
-                x: playerPos.x,
-                y: playerPos.y
-            };
-
-        }
-        else {
-
-            const last =
-                lines[
-                    lines.length - 1
-                ];
-
-            start = {
-                x: last.end.x,
-                y: last.end.y
-            };
-
-        }
-
-
-        currentLine = {
-
-            start: start,
-            end: pos
-
-        };
-
-
-        draw();
-
-    },
-    {
-        passive: false
-    }
-);
-
-
-gameScreen.addEventListener(
-    "touchmove",
-    function(e) {
-
-        if (!dragging)
-            return;
-
-        e.preventDefault();
-
-        currentLine.end =
-            getTouchPosition(e);
-
-        draw();
-
-    },
-    {
-        passive: false
-    }
-);
-
-
-gameScreen.addEventListener(
-    "touchend",
-    function() {
-
-        if (!dragging)
-            return;
-
-        dragging = false;
-
-
-        if (currentLine) {
-
-            lines.push(
-                currentLine
-            );
-
-            currentLine = null;
-
-        }
-
-
-        updateLineCount();
-
-        draw();
-
-    }
-);
-
-
-/* =====================================================
-   이펙트
-===================================================== */
-
-function createEnemyExplosion(
-    x,
-    y
-) {
-
-    particles.push({
-
-        x,
-        y,
-
-        vx: 0,
-        vy: 0,
-
-        life: 18,
-        maxLife: 18,
-
-        size: 22,
-
-        type: "flash"
-
-    });
-
-
-    for (
-        let i = 0;
-        i < 18;
-        i++
-    ) {
-
-        const angle =
-            Math.random() *
-            Math.PI * 2;
-
-        const speed =
-            2 +
-            Math.random() * 5;
-
-
-        particles.push({
-
-            x,
-            y,
-
-            vx:
-                Math.cos(angle) *
-                speed,
-
-            vy:
-                Math.sin(angle) *
-                speed,
-
-            life:
-                25 +
-                Math.random() * 20,
-
-            maxLife: 45,
-
-            size:
-                2 +
-                Math.random() * 5,
-
-            type: "fragment"
-
-        });
-
-    }
-
-
-    startEffectAnimation();
-
-}
-
-
-function createSlashTrail(
-    x,
-    y,
-    angle
-) {
-
-    slashTrails.push({
-
-        x,
-        y,
-        angle,
-
-        life: 8,
-        maxLife: 8
-
-    });
-
-
-    startEffectAnimation();
-
-}
-
-
-function startEffectAnimation() {
-
-    if (effectAnimationRunning)
-        return;
-
-    effectAnimationRunning = true;
-
-    requestAnimationFrame(
-        updateEffects
-    );
-
-}
-
-
-function updateEffects() {
-
-    ctx.clearRect(
-        0,
-        0,
-        width,
-        height
-    );
-
-    drawLines();
-
-
-    /* 검격 */
-
-    for (
-        let i =
-            slashTrails.length - 1;
-        i >= 0;
-        i--
-    ) {
-
-        const trail =
-            slashTrails[i];
-
-        trail.life--;
-
-        const progress =
-            1 -
-            trail.life /
-            trail.maxLife;
-
-        const alpha =
-            trail.life /
-            trail.maxLife;
-
-
-        ctx.save();
-
-        ctx.translate(
-            trail.x,
-            trail.y
-        );
-
-        ctx.rotate(
-            trail.angle
-        );
-
-        ctx.strokeStyle =
-            "white";
-
-        ctx.lineCap =
-            "round";
-
-
-        ctx.globalAlpha =
-            alpha * 0.25;
-
-        ctx.lineWidth =
-            10 *
-            (1 - progress);
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            -65,
-            8
-        );
-
-        ctx.quadraticCurveTo(
-            -5,
-            -30,
-            65,
-            -5
-        );
-
-        ctx.stroke();
-
-
-        ctx.globalAlpha =
-            alpha * 0.8;
-
-        ctx.lineWidth =
-            5 *
-            (1 - progress * 0.5);
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            -60,
-            6
-        );
-
-        ctx.quadraticCurveTo(
-            0,
-            -25,
-            60,
-            -2
-        );
-
-        ctx.stroke();
-
-
-        ctx.globalAlpha =
-            alpha;
-
-        ctx.lineWidth = 2;
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            -52,
-            3
-        );
-
-        ctx.quadraticCurveTo(
-            0,
-            -21,
-            54,
-            -3
-        );
-
-        ctx.stroke();
-
-
-        ctx.restore();
-
-
-        if (
-            trail.life <= 0
-        ) {
-
-            slashTrails.splice(
-                i,
-                1
-            );
-
-        }
-
-    }
-
-
-    /* 폭발 */
-
-    for (
-        let i =
-            particles.length - 1;
-        i >= 0;
-        i--
-    ) {
-
-        const p =
-            particles[i];
-
-        p.x += p.vx;
-        p.y += p.vy;
-
-        p.vx *= 0.96;
-        p.vy *= 0.96;
-
-        p.life--;
-
-
-        ctx.globalAlpha =
-            p.life /
-            p.maxLife;
-
-
-        if (
-            p.type ===
-            "flash"
-        ) {
-
-            const size =
-                p.size *
-                (
-                    1 -
-                    p.life /
-                    p.maxLife
-                );
-
-
-            ctx.fillStyle =
-                "white";
-
-            ctx.beginPath();
-
-            ctx.arc(
-                p.x,
-                p.y,
-                size,
-                0,
-                Math.PI * 2
-            );
-
-            ctx.fill();
-
-        }
-        else {
-
-            ctx.fillStyle =
-                "#ff4444";
-
-            ctx.beginPath();
-
-            ctx.arc(
-                p.x,
-                p.y,
-                p.size,
-                0,
-                Math.PI * 2
-            );
-
-            ctx.fill();
-
-        }
-
-
-        if (
-            p.life <= 0
-        ) {
-
-            particles.splice(
-                i,
-                1
-            );
-
-        }
-
-    }
-
-
-    ctx.globalAlpha = 1;
-
-
-    if (
-        particles.length > 0 ||
-        slashTrails.length > 0
-    ) {
-
-        requestAnimationFrame(
-            updateEffects
-        );
-
-    }
-    else {
-
-        effectAnimationRunning =
-            false;
-
-    }
-
-}
-
-
-/* =====================================================
-   선
-===================================================== */
-
-function drawLines() {
-
-    ctx.save();
-
-    ctx.lineWidth = 5;
-
-    ctx.lineCap = "round";
-
-    ctx.strokeStyle = "white";
-
-
-    for (
-        const line of lines
-    ) {
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            line.start.x,
-            line.start.y
-        );
-
-        ctx.lineTo(
-            line.end.x,
-            line.end.y
-        );
-
-        ctx.stroke();
-
-    }
-
-
-    if (currentLine) {
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            currentLine.start.x,
-            currentLine.start.y
-        );
-
-        ctx.lineTo(
-            currentLine.end.x,
-            currentLine.end.y
-        );
-
-        ctx.stroke();
-
-    }
-
-
-    ctx.restore();
-
-}
-
-
-function draw() {
-
-    ctx.clearRect(
-        0,
-        0,
-        width,
-        height
-    );
-
-    drawLines();
-
-}
-
-
-/* =====================================================
-   적 피격
-===================================================== */
-
-function pointToLineDistance(
-    p,
-    a,
-    b
-) {
-
-    const dx =
-        b.x - a.x;
-
-    const dy =
-        b.y - a.y;
-
-
-    if (
-        dx === 0 &&
-        dy === 0
-    ) {
-
-        return distance(
-            p,
-            a
-        );
-
-    }
-
-
-    const t =
-        (
-            (p.x - a.x) * dx +
-            (p.y - a.y) * dy
-        )
-        /
-        (
-            dx * dx +
-            dy * dy
-        );
-
-
-    const clamped =
-        Math.max(
-            0,
-            Math.min(
-                1,
-                t
-            )
-        );
-
-
-    const closest = {
-
-        x:
-            a.x +
-            clamped * dx,
-
-        y:
-            a.y +
-            clamped * dy
-
-    };
-
-
-    return distance(
-        p,
-        closest
-    );
-
-}
-
-
-function checkEnemyHit(
-    start,
-    current
-) {
-
-    enemies.forEach(
-        enemy => {
-
-            if (
-                enemy.style.display ===
-                "none"
-            ) {
-
-                return;
-
-            }
-
-
-            const rect =
-                enemy.getBoundingClientRect();
-
-
-            const enemyPos = {
-
-                x:
-                    rect.left +
-                    rect.width / 2,
-
-                y:
-                    rect.top +
-                    rect.height / 2
-
-            };
-
-
-            const hitDistance =
-                pointToLineDistance(
-                    enemyPos,
-                    start,
-                    current
-                );
-
-
-            if (
-                hitDistance < 24
-            ) {
-
-                createEnemyExplosion(
-                    enemyPos.x,
-                    enemyPos.y
-                );
-
-
-                enemy.style.opacity =
-                    "0";
-
-                enemy.style.display =
-                    "none";
-
-
-                updateEnemyCount();
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =====================================================
-   베기
-===================================================== */
 
 slashButton.addEventListener(
-    "click",
-    function() {
+    "pointerup",
+    function(e) {
 
-        if (attacking)
+        e.preventDefault();
+        e.stopPropagation();
+
+
+        if (
+            attacking ||
+            !gameStarted
+        )
             return;
+
 
         if (
             lines.length === 0
@@ -4932,8 +2312,8 @@ slashButton.addEventListener(
         slashButton.disabled =
             true;
 
-        moveAlongPath(0);
 
+        moveAlongPath(0);
     }
 );
 
@@ -4951,12 +2331,12 @@ function moveAlongPath(index) {
         );
 
         return;
-
     }
 
 
     const line =
         lines[index];
+
 
     const start =
         line.start;
@@ -4965,7 +2345,12 @@ function moveAlongPath(index) {
         line.end;
 
 
+    /*
+       모든 선을 매우 빠르게 이동
+    */
+
     const duration = 120;
+
 
     const startTime =
         performance.now();
@@ -4986,12 +2371,10 @@ function moveAlongPath(index) {
                 (
                     time -
                     startTime
-                )
-                /
+                ) /
                 duration,
 
                 1
-
             );
 
 
@@ -5016,6 +2399,7 @@ function moveAlongPath(index) {
         player.style.left =
             playerPos.x + "px";
 
+
         player.style.top =
             playerPos.y + "px";
 
@@ -5028,7 +2412,6 @@ function moveAlongPath(index) {
 
                 playerPos.x -
                 previousX
-
             );
 
 
@@ -5047,7 +2430,6 @@ function moveAlongPath(index) {
                 x: playerPos.x,
                 y: playerPos.y
             }
-
         );
 
 
@@ -5072,21 +2454,18 @@ function moveAlongPath(index) {
             moveAlongPath(
                 index + 1
             );
-
         }
-
     }
 
 
     requestAnimationFrame(
         animate
     );
-
 }
 
 
 /* =====================================================
-   공격 종료
+   베기 종료
 ===================================================== */
 
 function finishAttack() {
@@ -5103,15 +2482,17 @@ function finishAttack() {
             ) {
 
                 alive++;
-
             }
-
         }
     );
 
 
     attacking = false;
 
+
+    /*
+       전부 처치
+    */
 
     if (
         alive === 0
@@ -5123,31 +2504,49 @@ function finishAttack() {
         );
 
     }
+
+
+    /*
+       하나라도 살아있으면
+       같은 스테이지 재시작
+    */
+
     else {
 
         setTimeout(
             restartStage,
             300
         );
-
     }
-
 }
 
 
 /* =====================================================
-   실패 → 같은 스테이지
+   스테이지 실패
 ===================================================== */
 
 function restartStage() {
+
+    /*
+       선 초기화
+    */
 
     lines = [];
 
     currentLine = null;
 
 
+    /*
+       플레이어 초기화
+    */
+
     resetPlayerPosition();
 
+
+    /*
+       적 위치는 건드리지 않고
+       죽은 적만 다시 살림
+    */
 
     enemies.forEach(
         enemy => {
@@ -5157,7 +2556,6 @@ function restartStage() {
 
             enemy.style.opacity =
                 "1";
-
         }
     );
 
@@ -5165,6 +2563,11 @@ function restartStage() {
     particles = [];
 
     slashTrails = [];
+
+
+    attacking = false;
+
+    dragging = false;
 
 
     updateEnemyCount();
@@ -5176,9 +2579,6 @@ function restartStage() {
 
     slashButton.disabled =
         false;
-
-    attacking = false;
-
 }
 
 
@@ -5195,16 +2595,32 @@ function nextStage() {
         "STAGE " + stage;
 
 
+    /*
+       플레이어 초기화
+    */
+
     resetPlayerPosition();
 
+
+    /*
+       선 초기화
+    */
 
     lines = [];
 
     currentLine = null;
 
 
+    /*
+       새 스테이지의 선 개수
+    */
+
     updateMaxLines();
 
+
+    /*
+       새 적 배치
+    */
 
     spawnEnemies();
 
@@ -5212,6 +2628,11 @@ function nextStage() {
     particles = [];
 
     slashTrails = [];
+
+
+    attacking = false;
+
+    dragging = false;
 
 
     updateEnemyCount();
@@ -5223,89 +2644,208 @@ function nextStage() {
 
     slashButton.disabled =
         false;
-
-    attacking = false;
-
 }
 
 
 /* =====================================================
-   게임 시작
+   ★ 게임 시작
 ===================================================== */
+
+/*
+   click 대신 pointerup을 사용한다.
+   모바일 터치 / 마우스 모두 대응.
+*/
+
+function startGame(e) {
+
+    if (e) {
+
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+
+    if (gameStarted)
+        return;
+
+
+    gameStarted = true;
+
+
+    /*
+       먼저 게임 화면을 표시
+    */
+
+    startScreen.style.display =
+        "none";
+
+    gameScreen.style.display =
+        "block";
+
+
+    /*
+       게임 변수 초기화
+    */
+
+    stage = 1;
+
+    lines = [];
+
+    currentLine = null;
+
+    particles = [];
+
+    slashTrails = [];
+
+    attacking = false;
+
+    dragging = false;
+
+
+    stageText.textContent =
+        "STAGE 1";
+
+
+    /*
+       화면 크기 계산
+    */
+
+    resize();
+
+
+    /*
+       선 제한
+    */
+
+    updateMaxLines();
+
+
+    /*
+       적 생성
+    */
+
+    spawnEnemies();
+
+
+    /*
+       UI
+    */
+
+    updateEnemyCount();
+
+    updateLineCount();
+
+
+    draw();
+
+
+    slashButton.disabled =
+        false;
+}
+
+
+/*
+   pointerup
+*/
+
+startButton.addEventListener(
+    "pointerup",
+    startGame,
+    {
+        passive: false
+    }
+);
+
+
+/*
+   일부 오래된 모바일 브라우저 대응
+*/
+
+startButton.addEventListener(
+    "touchend",
+    function(e) {
+
+        e.preventDefault();
+
+        startGame(e);
+
+    },
+    {
+        passive: false
+    }
+);
+
+
+/*
+   혹시 데스크톱에서 pointer가
+   이상하게 동작하는 경우까지 대응
+*/
 
 startButton.addEventListener(
     "click",
-    function() {
+    function(e) {
 
-        startScreen.style.display =
-            "none";
+        e.preventDefault();
 
-        gameScreen.style.display =
-            "block";
-
-
-        stage = 1;
-
-
-        stageText.textContent =
-            "STAGE 1";
-
-
-        lines = [];
-
-        currentLine = null;
-
-        particles = [];
-
-        slashTrails = [];
-
-
-        updateMaxLines();
-
-        resize();
-
-        spawnEnemies();
-
-        updateEnemyCount();
-
-        updateLineCount();
-
-        draw();
+        startGame(e);
 
     }
 );
 
 
 /* =====================================================
-   아직 기능 없는 버튼
+   메뉴 버튼
 ===================================================== */
 
 characterButton.addEventListener(
-    "click",
+    "pointerdown",
     function(e) {
 
         e.preventDefault();
+        e.stopPropagation();
 
     }
 );
 
 
 settingsButton.addEventListener(
-    "click",
+    "pointerdown",
     function(e) {
 
         e.preventDefault();
+        e.stopPropagation();
 
     }
 );
 
 
 /* =====================================================
-   초기화
+   화면 초기화
 ===================================================== */
+
+window.addEventListener(
+    "resize",
+    function() {
+
+        resizeMenuCanvas();
+
+        if (
+            gameStarted
+        ) {
+
+            resize();
+        }
+    }
+);
+
 
 resizeMenuCanvas();
 
 createMenuObjects();
 
 animateMenu();
+
+</script>
+
+</body>
+</html>
