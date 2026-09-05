@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
 <meta charset="UTF-8">
+
 <meta name="viewport"
       content="width=device-width,
                initial-scale=1.0,
@@ -11,20 +13,35 @@
 <title>Slash Game</title>
 
 <style>
+
+/* =====================================================
+   기본
+===================================================== */
+
 * {
     box-sizing: border-box;
+
     user-select: none;
     -webkit-user-select: none;
+
     -webkit-touch-callout: none;
 }
 
-html, body {
+html,
+body {
+
     margin: 0;
+
     width: 100%;
     height: 100%;
+
     overflow: hidden;
+
     background: #000;
-    font-family: Arial, sans-serif;
+
+    font-family:
+        Arial,
+        sans-serif;
 }
 
 body {
@@ -37,23 +54,32 @@ button {
 
 
 /* =====================================================
-   전체
+   게임 전체
 ===================================================== */
 
 #game {
+
     position: fixed;
+
     inset: 0;
+
+    width: 100%;
+    height: 100%;
+
     background: #050505;
+
     overflow: hidden;
 }
 
 
 /* =====================================================
-   메인 메뉴
+   메인 화면
 ===================================================== */
 
 #startScreen {
+
     position: fixed;
+
     inset: 0;
 
     width: 100%;
@@ -67,7 +93,9 @@ button {
 }
 
 #menuCanvas {
+
     position: absolute;
+
     inset: 0;
 
     width: 100%;
@@ -82,9 +110,11 @@ button {
 /* 제목 */
 
 #gameTitle {
+
     position: absolute;
 
     top: 17%;
+
     left: 0;
 
     width: 100%;
@@ -94,6 +124,7 @@ button {
     color: white;
 
     font-size: 42px;
+
     font-weight: bold;
 
     letter-spacing: 3px;
@@ -103,13 +134,15 @@ button {
     pointer-events: none;
 
     text-shadow:
-        0 0 15px rgba(255,255,255,0.25);
+        0 0 15px
+        rgba(255,255,255,0.25);
 }
 
 
 /* 시작 버튼 */
 
 #startButton {
+
     position: absolute;
 
     left: 50%;
@@ -123,27 +156,22 @@ button {
 
     border: none;
 
+    padding: 0;
+
+    margin: 0;
+
     background: white;
 
-    /*
-       실제 버튼은 110 × 110.
-       보이는 부분만 삼각형.
-    */
-
-    clip-path: polygon(
-        25% 10%,
-        25% 90%,
-        90% 50%
-    );
+    clip-path:
+        polygon(
+            25% 10%,
+            25% 90%,
+            90% 50%
+        );
 
     z-index: 100;
 
-    cursor: pointer;
-
     touch-action: manipulation;
-
-    padding: 0;
-    margin: 0;
 
     filter:
         drop-shadow(
@@ -156,15 +184,17 @@ button {
 }
 
 #startButton:active {
+
     transform:
         translate(-50%, -50%)
         scale(0.85);
 }
 
 
-/* 좌우 메뉴 */
+/* 좌우 버튼 */
 
 .menuButton {
+
     position: absolute;
 
     bottom: 16%;
@@ -179,9 +209,11 @@ button {
     color: white;
 
     display: flex;
+
     flex-direction: column;
 
     align-items: center;
+
     justify-content: center;
 
     gap: 7px;
@@ -202,6 +234,7 @@ button {
 }
 
 .menuIcon {
+
     width: 46px;
     height: 46px;
 
@@ -224,11 +257,178 @@ button {
 
 
 /* =====================================================
+   모드 선택 화면
+===================================================== */
+
+#modeScreen {
+
+    position: fixed;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: #050505;
+
+    z-index: 900;
+
+    display: none;
+
+    overflow: hidden;
+}
+
+
+/* 모드 제목 */
+
+#modeTitle {
+
+    position: absolute;
+
+    top: 12%;
+
+    width: 100%;
+
+    text-align: center;
+
+    color: white;
+
+    font-size: 30px;
+
+    font-weight: bold;
+
+    letter-spacing: 2px;
+}
+
+
+/* 모드 목록 */
+
+#modeList {
+
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    width: min(82%, 360px);
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 15px;
+}
+
+
+/* 모드 버튼 */
+
+.modeButton {
+
+    width: 100%;
+
+    min-height: 75px;
+
+    border: 1px solid
+        rgba(255,255,255,0.25);
+
+    border-radius: 15px;
+
+    background:
+        rgba(255,255,255,0.04);
+
+    color: white;
+
+    text-align: left;
+
+    padding:
+        12px 20px;
+
+    touch-action: manipulation;
+
+    transition:
+        transform 0.12s,
+        background 0.12s;
+}
+
+.modeButton:active {
+
+    transform:
+        scale(0.96);
+
+    background:
+        rgba(255,255,255,0.12);
+}
+
+.modeName {
+
+    display: block;
+
+    font-size: 19px;
+
+    font-weight: bold;
+
+    margin-bottom: 5px;
+}
+
+.modeDescription {
+
+    display: block;
+
+    color: #aaa;
+
+    font-size: 13px;
+}
+
+
+/* 뒤로가기 */
+
+#backToMenu {
+
+    position: absolute;
+
+    left: 50%;
+
+    bottom: 9%;
+
+    transform:
+        translateX(-50%);
+
+    width: 120px;
+    height: 45px;
+
+    border: 1px solid #444;
+
+    border-radius: 10px;
+
+    background:
+        rgba(255,255,255,0.03);
+
+    color: #aaa;
+
+    font-size: 15px;
+
+    touch-action: manipulation;
+}
+
+#backToMenu:active {
+
+    transform:
+        translateX(-50%)
+        scale(0.95);
+}
+
+
+/* =====================================================
    게임 화면
 ===================================================== */
 
 #gameScreen {
+
     position: fixed;
+
     inset: 0;
 
     width: 100%;
@@ -247,6 +447,7 @@ button {
 /* 게임 Canvas */
 
 #canvas {
+
     position: absolute;
 
     inset: 0;
@@ -265,6 +466,7 @@ button {
 ===================================================== */
 
 #gameUI {
+
     position: absolute;
 
     top: 18px;
@@ -275,23 +477,34 @@ button {
 
     display: flex;
 
-    justify-content: space-between;
+    justify-content:
+        space-between;
 
     pointer-events: none;
 }
 
 #leftInfo {
+
     display: flex;
+
     flex-direction: column;
+
     gap: 5px;
 }
 
 #rightInfo {
+
     display: flex;
-    align-items: flex-start;
+
+    flex-direction: column;
+
+    align-items: flex-end;
+
+    gap: 5px;
 }
 
 .uiText {
+
     color: white;
 
     text-shadow:
@@ -300,18 +513,42 @@ button {
 }
 
 #stage {
+
     font-size: 21px;
+
     font-weight: bold;
 }
 
 #enemyCount {
+
     font-size: 16px;
+
     color: #ddd;
 }
 
 #lineCount {
-    font-size: 18px;
+
+    font-size: 16px;
+
     color: #ddd;
+}
+
+#scoreText {
+
+    display: none;
+
+    font-size: 17px;
+
+    font-weight: bold;
+}
+
+#timerText {
+
+    display: none;
+
+    font-size: 20px;
+
+    font-weight: bold;
 }
 
 
@@ -320,6 +557,7 @@ button {
 ===================================================== */
 
 #player {
+
     position: absolute;
 
     width: 35px;
@@ -347,6 +585,7 @@ button {
 ===================================================== */
 
 .enemy {
+
     position: absolute;
 
     width: 40px;
@@ -376,9 +615,11 @@ button {
 ===================================================== */
 
 #slashButton {
+
     position: absolute;
 
     left: 50%;
+
     bottom: 25px;
 
     transform:
@@ -396,6 +637,7 @@ button {
     color: black;
 
     font-size: 20px;
+
     font-weight: bold;
 
     z-index: 50;
@@ -404,19 +646,106 @@ button {
 }
 
 #slashButton:active {
+
     transform:
         translateX(-50%)
         scale(0.95);
 }
 
 #slashButton:disabled {
+
     opacity: 0.5;
 }
+
+
+/* =====================================================
+   게임 오버 화면
+===================================================== */
+
+#gameOverScreen {
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        rgba(0,0,0,0.82);
+
+    z-index: 200;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-direction: column;
+
+    color: white;
+
+    text-align: center;
+}
+
+#gameOverTitle {
+
+    font-size: 38px;
+
+    font-weight: bold;
+
+    margin-bottom: 12px;
+}
+
+#gameOverInfo {
+
+    color: #bbb;
+
+    font-size: 16px;
+
+    margin-bottom: 25px;
+}
+
+#restartButton {
+
+    width: 150px;
+    height: 55px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background: white;
+
+    color: black;
+
+    font-size: 17px;
+
+    font-weight: bold;
+
+    margin-bottom: 10px;
+}
+
+#menuButton {
+
+    width: 150px;
+    height: 45px;
+
+    border: 1px solid #555;
+
+    border-radius: 12px;
+
+    background: transparent;
+
+    color: #aaa;
+
+    font-size: 15px;
+}
+
 </style>
 </head>
 
 
 <body>
+
 
 <div id="game">
 
@@ -433,10 +762,12 @@ button {
         Slash Game
     </div>
 
+
     <button id="startButton"
             type="button"
             aria-label="게임 시작">
     </button>
+
 
     <button id="characterButton"
             class="menuButton"
@@ -451,6 +782,7 @@ button {
         </div>
 
     </button>
+
 
     <button id="settingsButton"
             class="menuButton"
@@ -469,11 +801,82 @@ button {
 </div>
 
 
+
 <!-- ===================================================
-     게임
+     모드 선택
+=================================================== -->
+
+<div id="modeScreen">
+
+    <div id="modeTitle">
+        GAME MODE
+    </div>
+
+
+    <div id="modeList">
+
+        <button class="modeButton"
+                data-mode="score"
+                type="button">
+
+            <span class="modeName">
+                🏆 점수 모드
+            </span>
+
+            <span class="modeDescription">
+                적을 처치할 때마다 점수 +1
+            </span>
+
+        </button>
+
+
+        <button class="modeButton"
+                data-mode="infinite"
+                type="button">
+
+            <span class="modeName">
+                ∞ 무한 모드
+            </span>
+
+            <span class="modeDescription">
+                점수와 시간 제한 없이 계속 진행
+            </span>
+
+        </button>
+
+
+        <button class="modeButton"
+                data-mode="timed"
+                type="button">
+
+            <span class="modeName">
+                ⏱ 시간제한 모드
+            </span>
+
+            <span class="modeDescription">
+                제한시간 3분 동안 최대한 진행
+            </span>
+
+        </button>
+
+    </div>
+
+
+    <button id="backToMenu"
+            type="button">
+        뒤로가기
+    </button>
+
+</div>
+
+
+
+<!-- ===================================================
+     게임 화면
 =================================================== -->
 
 <div id="gameScreen">
+
 
     <div id="gameUI">
 
@@ -491,7 +894,18 @@ button {
 
         </div>
 
+
         <div id="rightInfo">
+
+            <div id="scoreText"
+                 class="uiText">
+                SCORE 0
+            </div>
+
+            <div id="timerText"
+                 class="uiText">
+                3:00
+            </div>
 
             <div id="lineCount"
                  class="uiText">
@@ -505,16 +919,45 @@ button {
 
     <canvas id="canvas"></canvas>
 
+
     <div id="player"></div>
+
 
     <button id="slashButton"
             type="button">
         ⚔ 베기
     </button>
 
-</div>
+
+    <!-- 게임 오버 -->
+
+    <div id="gameOverScreen">
+
+        <div id="gameOverTitle">
+            TIME UP
+        </div>
+
+        <div id="gameOverInfo">
+            STAGE 1
+        </div>
+
+        <button id="restartButton"
+                type="button">
+            다시 시작
+        </button>
+
+        <button id="menuButton"
+                type="button">
+            메인 메뉴
+        </button>
+
+    </div>
 
 </div>
+
+
+</div>
+
 
 
 <script>
@@ -524,56 +967,142 @@ button {
 ===================================================== */
 
 const startScreen =
-    document.getElementById("startScreen");
+    document.getElementById(
+        "startScreen"
+    );
+
+const modeScreen =
+    document.getElementById(
+        "modeScreen"
+    );
 
 const gameScreen =
-    document.getElementById("gameScreen");
+    document.getElementById(
+        "gameScreen"
+    );
 
 const startButton =
-    document.getElementById("startButton");
+    document.getElementById(
+        "startButton"
+    );
+
+const backToMenu =
+    document.getElementById(
+        "backToMenu"
+    );
 
 const characterButton =
-    document.getElementById("characterButton");
+    document.getElementById(
+        "characterButton"
+    );
 
 const settingsButton =
-    document.getElementById("settingsButton");
+    document.getElementById(
+        "settingsButton"
+    );
 
 const menuCanvas =
-    document.getElementById("menuCanvas");
+    document.getElementById(
+        "menuCanvas"
+    );
 
 const menuCtx =
     menuCanvas.getContext("2d");
 
 const canvas =
-    document.getElementById("canvas");
+    document.getElementById(
+        "canvas"
+    );
 
 const ctx =
     canvas.getContext("2d");
 
 const player =
-    document.getElementById("player");
+    document.getElementById(
+        "player"
+    );
 
 const slashButton =
-    document.getElementById("slashButton");
+    document.getElementById(
+        "slashButton"
+    );
 
 const stageText =
-    document.getElementById("stage");
+    document.getElementById(
+        "stage"
+    );
 
 const enemyCountText =
-    document.getElementById("enemyCount");
+    document.getElementById(
+        "enemyCount"
+    );
 
 const lineCountText =
-    document.getElementById("lineCount");
+    document.getElementById(
+        "lineCount"
+    );
+
+const scoreText =
+    document.getElementById(
+        "scoreText"
+    );
+
+const timerText =
+    document.getElementById(
+        "timerText"
+    );
+
+const gameOverScreen =
+    document.getElementById(
+        "gameOverScreen"
+    );
+
+const gameOverTitle =
+    document.getElementById(
+        "gameOverTitle"
+    );
+
+const gameOverInfo =
+    document.getElementById(
+        "gameOverInfo"
+    );
+
+const restartButton =
+    document.getElementById(
+        "restartButton"
+    );
+
+const menuButton =
+    document.getElementById(
+        "menuButton"
+    );
+
+const modeButtons =
+    document.querySelectorAll(
+        ".modeButton"
+    );
 
 
 /* =====================================================
-   변수
+   게임 변수
 ===================================================== */
 
 let width = 0;
 let height = 0;
 
 let stage = 1;
+
+let gameMode = null;
+
+let score = 0;
+
+let timeRemaining = 180;
+
+let timerInterval = null;
+
+let gameStarted = false;
+
+let gameOver = false;
 
 let playerPos = {
     x: 0,
@@ -600,11 +1129,9 @@ let slashTrails = [];
 
 let effectAnimationRunning = false;
 
-let gameStarted = false;
-
 
 /* =====================================================
-   메뉴 애니메이션
+   메뉴 배경 애니메이션
 ===================================================== */
 
 let menuObjects = [];
@@ -625,6 +1152,7 @@ function resizeMenuCanvas() {
 function createMenuObjects() {
 
     menuObjects = [];
+
 
     for (
         let i = 0;
@@ -668,7 +1196,9 @@ function animateMenu() {
         animateMenu
     );
 
+
     menuTime += 0.01;
+
 
     menuCtx.clearRect(
         0,
@@ -678,7 +1208,7 @@ function animateMenu() {
     );
 
 
-    /* 희미한 격자 */
+    /* 격자 */
 
     menuCtx.strokeStyle =
         "rgba(255,255,255,0.025)";
@@ -907,7 +1437,7 @@ function animateMenu() {
 
 
 /* =====================================================
-   게임 기본
+   화면 크기
 ===================================================== */
 
 function resize() {
@@ -950,13 +1480,16 @@ function resetPlayerPosition() {
 
 
 /* =====================================================
-   스테이지 난이도
+   적 수 / 선 수
 ===================================================== */
 
 function getEnemyCount() {
 
     let count =
-        Math.floor(stage / 5);
+        Math.floor(
+            stage / 5
+        );
+
 
     count =
         Math.max(
@@ -964,11 +1497,13 @@ function getEnemyCount() {
             count
         );
 
+
     count =
         Math.min(
             7,
             count
         );
+
 
     return count;
 }
@@ -978,6 +1513,7 @@ function updateMaxLines() {
 
     const enemyCount =
         getEnemyCount();
+
 
     maxLines =
         Math.max(
@@ -992,8 +1528,10 @@ function updateLineCount() {
     const remaining =
         Math.max(
             0,
-            maxLines - lines.length
+            maxLines -
+            lines.length
         );
+
 
     lineCountText.textContent =
         `선 ${remaining} / ${maxLines}`;
@@ -1003,6 +1541,7 @@ function updateLineCount() {
 function updateEnemyCount() {
 
     let alive = 0;
+
 
     enemies.forEach(
         enemy => {
@@ -1023,8 +1562,15 @@ function updateEnemyCount() {
 }
 
 
+function updateScore() {
+
+    scoreText.textContent =
+        `SCORE ${score}`;
+}
+
+
 /* =====================================================
-   수학
+   거리 계산
 ===================================================== */
 
 function distance(a, b) {
@@ -1122,14 +1668,12 @@ function generateSolutionPath() {
 
 
             for (
-                let j = 0;
-                j < points.length;
-                j++
+                const point of points
             ) {
 
                 if (
                     distance(
-                        points[j],
+                        point,
                         candidate
                     ) < 100
                 ) {
@@ -1185,7 +1729,8 @@ function getPathLength() {
 
 
     for (
-        const segment of solutionPath
+        const segment of
+        solutionPath
     ) {
 
         total +=
@@ -1208,7 +1753,8 @@ function pointAtDistanceFromPath(
 
 
     for (
-        const segment of solutionPath
+        const segment of
+        solutionPath
     ) {
 
         const length =
@@ -1258,13 +1804,23 @@ function generateEnemyPositions() {
     const count =
         getEnemyCount();
 
+
     const totalLength =
         getPathLength();
+
 
     const positions = [];
 
 
-    const minimumDistance = 90;
+    /*
+       적 사이 최소 거리
+
+       후반부에서도 너무 붙지 않도록
+       적 수가 많아질수록 조금 더 넓게
+    */
+
+    const minimumDistance =
+        90;
 
 
     for (
@@ -1306,7 +1862,8 @@ function generateEnemyPositions() {
 
         const base =
             pointAtDistanceFromPath(
-                totalLength * ratio
+                totalLength *
+                ratio
             );
 
 
@@ -1379,11 +1936,17 @@ function spawnEnemies() {
         enemy => enemy.remove()
     );
 
+
     enemies = [];
 
 
     let positions = null;
 
+
+    /*
+       정답 경로와 적 배치를
+       만족할 때까지 다시 생성
+    */
 
     for (
         let attempt = 0;
@@ -1409,15 +1972,17 @@ function spawnEnemies() {
 
 
     /*
-       극단적인 경우에도 스테이지가
-       생성되도록 하는 fallback
+       혹시 생성 실패했을 때
+       강제 생성
     */
 
     if (!positions) {
 
         generateSolutionPath();
 
+
         positions = [];
+
 
         const total =
             getPathLength();
@@ -1435,7 +2000,10 @@ function spawnEnemies() {
 
                     total *
                     (i + 1) /
-                    (getEnemyCount() + 1)
+                    (
+                        getEnemyCount() +
+                        1
+                    )
 
                 )
             );
@@ -1479,12 +2047,13 @@ function spawnEnemies() {
 
 
 /* =====================================================
-   선 그리기
+   화면 그리기
 ===================================================== */
 
 function drawLines() {
 
     ctx.save();
+
 
     ctx.lineWidth = 5;
 
@@ -1546,12 +2115,13 @@ function draw() {
         height
     );
 
+
     drawLines();
 }
 
 
 /* =====================================================
-   터치 → 좌표
+   터치 좌표
 ===================================================== */
 
 function getPointerPosition(e) {
@@ -1559,13 +2129,14 @@ function getPointerPosition(e) {
     return {
 
         x: e.clientX,
+
         y: e.clientY
     };
 }
 
 
 /* =====================================================
-   선 그리기 입력
+   선 그리기
 ===================================================== */
 
 gameScreen.addEventListener(
@@ -1574,6 +2145,7 @@ gameScreen.addEventListener(
 
         if (
             !gameStarted ||
+            gameOver ||
             attacking
         )
             return;
@@ -1602,7 +2174,8 @@ gameScreen.addEventListener(
 
 
         /*
-           첫 번째 선은 플레이어에서 시작
+           첫 번째 선:
+           플레이어 → 손
         */
 
         if (
@@ -1612,14 +2185,16 @@ gameScreen.addEventListener(
             start = {
 
                 x: playerPos.x,
+
                 y: playerPos.y
             };
 
         }
 
+
         /*
-           두 번째 선부터는
-           이전 선의 끝에서 시작
+           두 번째 선부터:
+           이전 선의 끝 → 손
         */
 
         else {
@@ -1633,6 +2208,7 @@ gameScreen.addEventListener(
             start = {
 
                 x: last.end.x,
+
                 y: last.end.y
             };
         }
@@ -1645,6 +2221,7 @@ gameScreen.addEventListener(
             end: {
 
                 x: pos.x,
+
                 y: pos.y
             }
         };
@@ -1715,11 +2292,9 @@ function finishDrawing(e) {
             );
 
 
-        /*
-           너무 짧은 터치는 선으로 인정하지 않음
-        */
-
-        if (length > 20) {
+        if (
+            length > 20
+        ) {
 
             lines.push(
                 currentLine
@@ -1750,7 +2325,7 @@ gameScreen.addEventListener(
 
 
 /* =====================================================
-   선과 적 충돌
+   선-적 충돌
 ===================================================== */
 
 function pointToLineDistance(
@@ -1864,20 +2439,10 @@ function checkEnemyHit(
                 hitDistance < 24
             ) {
 
-                createEnemyExplosion(
-                    enemyPos.x,
-                    enemyPos.y
+                killEnemy(
+                    enemy,
+                    enemyPos
                 );
-
-
-                enemy.style.opacity =
-                    "0";
-
-                enemy.style.display =
-                    "none";
-
-
-                updateEnemyCount();
             }
         }
     );
@@ -1885,7 +2450,56 @@ function checkEnemyHit(
 
 
 /* =====================================================
-   이펙트
+   적 처치
+===================================================== */
+
+function killEnemy(
+    enemy,
+    position
+) {
+
+    if (
+        enemy.style.display ===
+        "none"
+    ) {
+
+        return;
+    }
+
+
+    createEnemyExplosion(
+        position.x,
+        position.y
+    );
+
+
+    enemy.style.opacity =
+        "0";
+
+    enemy.style.display =
+        "none";
+
+
+    /*
+       점수 모드에서만 점수 증가
+    */
+
+    if (
+        gameMode === "score"
+    ) {
+
+        score++;
+
+        updateScore();
+    }
+
+
+    updateEnemyCount();
+}
+
+
+/* =====================================================
+   적 폭발 이펙트
 ===================================================== */
 
 function createEnemyExplosion(
@@ -1896,12 +2510,15 @@ function createEnemyExplosion(
     particles.push({
 
         x: x,
+
         y: y,
 
         vx: 0,
+
         vy: 0,
 
         life: 18,
+
         maxLife: 18,
 
         size: 22,
@@ -1929,6 +2546,7 @@ function createEnemyExplosion(
         particles.push({
 
             x: x,
+
             y: y,
 
             vx:
@@ -1949,7 +2567,8 @@ function createEnemyExplosion(
                 2 +
                 Math.random() * 5,
 
-            type: "fragment"
+            type:
+                "fragment"
         });
     }
 
@@ -1957,6 +2576,10 @@ function createEnemyExplosion(
     startEffectAnimation();
 }
 
+
+/* =====================================================
+   깔끔한 검격 이펙트
+===================================================== */
 
 function createSlashTrail(
     x,
@@ -1967,11 +2590,13 @@ function createSlashTrail(
     slashTrails.push({
 
         x: x,
+
         y: y,
 
         angle: angle,
 
         life: 8,
+
         maxLife: 8
     });
 
@@ -2016,7 +2641,9 @@ function updateEffects() {
     for (
         let i =
             slashTrails.length - 1;
+
         i >= 0;
+
         i--
     ) {
 
@@ -2052,23 +2679,22 @@ function updateEffects() {
         );
 
 
-        ctx.strokeStyle =
-            "white";
-
-
-        ctx.lineCap =
-            "round";
-
-
-        /* 바깥쪽 */
+        /*
+           부드러운 외곽 검격
+        */
 
         ctx.globalAlpha =
             alpha * 0.25;
 
-
         ctx.lineWidth =
             10 *
             (1 - progress);
+
+        ctx.lineCap =
+            "round";
+
+        ctx.strokeStyle =
+            "white";
 
 
         ctx.beginPath();
@@ -2088,11 +2714,12 @@ function updateEffects() {
         ctx.stroke();
 
 
-        /* 중앙 */
+        /*
+           중앙 검격
+        */
 
         ctx.globalAlpha =
             alpha * 0.8;
-
 
         ctx.lineWidth =
             5 *
@@ -2117,11 +2744,12 @@ function updateEffects() {
         ctx.stroke();
 
 
-        /* 날카로운 중심선 */
+        /*
+           얇은 날
+        */
 
         ctx.globalAlpha =
             alpha;
-
 
         ctx.lineWidth = 2;
 
@@ -2158,12 +2786,14 @@ function updateEffects() {
     }
 
 
-    /* 적 폭발 */
+    /* 폭발 파티클 */
 
     for (
         let i =
             particles.length - 1;
+
         i >= 0;
+
         i--
     ) {
 
@@ -2172,10 +2802,12 @@ function updateEffects() {
 
 
         p.x += p.vx;
+
         p.y += p.vy;
 
 
         p.vx *= 0.96;
+
         p.vy *= 0.96;
 
 
@@ -2218,6 +2850,7 @@ function updateEffects() {
             ctx.fill();
 
         }
+
         else {
 
             ctx.fillStyle =
@@ -2263,6 +2896,7 @@ function updateEffects() {
         );
 
     }
+
     else {
 
         effectAnimationRunning =
@@ -2272,7 +2906,7 @@ function updateEffects() {
 
 
 /* =====================================================
-   베기
+   베기 버튼
 ===================================================== */
 
 slashButton.addEventListener(
@@ -2280,8 +2914,8 @@ slashButton.addEventListener(
     function(e) {
 
         e.preventDefault();
-        e.stopPropagation();
 
+        e.stopPropagation();
     }
 );
 
@@ -2291,12 +2925,14 @@ slashButton.addEventListener(
     function(e) {
 
         e.preventDefault();
+
         e.stopPropagation();
 
 
         if (
             attacking ||
-            !gameStarted
+            !gameStarted ||
+            gameOver
         )
             return;
 
@@ -2309,6 +2945,7 @@ slashButton.addEventListener(
 
         attacking = true;
 
+
         slashButton.disabled =
             true;
 
@@ -2317,6 +2954,10 @@ slashButton.addEventListener(
     }
 );
 
+
+/* =====================================================
+   플레이어 이동
+===================================================== */
 
 function moveAlongPath(index) {
 
@@ -2346,7 +2987,7 @@ function moveAlongPath(index) {
 
 
     /*
-       모든 선을 매우 빠르게 이동
+       매우 빠른 베기 속도
     */
 
     const duration = 120;
@@ -2428,6 +3069,7 @@ function moveAlongPath(index) {
 
             {
                 x: playerPos.x,
+
                 y: playerPos.y
             }
         );
@@ -2449,6 +3091,7 @@ function moveAlongPath(index) {
             );
 
         }
+
         else {
 
             moveAlongPath(
@@ -2469,6 +3112,10 @@ function moveAlongPath(index) {
 ===================================================== */
 
 function finishAttack() {
+
+    if (gameOver)
+        return;
+
 
     let alive = 0;
 
@@ -2491,7 +3138,7 @@ function finishAttack() {
 
 
     /*
-       전부 처치
+       모든 적 처치
     */
 
     if (
@@ -2502,13 +3149,11 @@ function finishAttack() {
             nextStage,
             300
         );
-
     }
 
 
     /*
-       하나라도 살아있으면
-       같은 스테이지 재시작
+       실패
     */
 
     else {
@@ -2522,10 +3167,14 @@ function finishAttack() {
 
 
 /* =====================================================
-   스테이지 실패
+   스테이지 실패 리셋
 ===================================================== */
 
 function restartStage() {
+
+    if (gameOver)
+        return;
+
 
     /*
        선 초기화
@@ -2544,8 +3193,9 @@ function restartStage() {
 
 
     /*
-       적 위치는 건드리지 않고
-       죽은 적만 다시 살림
+       적 위치는 절대 바꾸지 않는다.
+
+       죽은 적만 다시 살린다.
     */
 
     enemies.forEach(
@@ -2588,6 +3238,10 @@ function restartStage() {
 
 function nextStage() {
 
+    if (gameOver)
+        return;
+
+
     stage++;
 
 
@@ -2612,14 +3266,14 @@ function nextStage() {
 
 
     /*
-       새 스테이지의 선 개수
+       새 스테이지 선 개수
     */
 
     updateMaxLines();
 
 
     /*
-       새 적 배치
+       새로운 정답 경로 + 적 배치
     */
 
     spawnEnemies();
@@ -2648,46 +3302,105 @@ function nextStage() {
 
 
 /* =====================================================
-   ★ 게임 시작
+   모드 선택
 ===================================================== */
 
+function openModeScreen() {
+
+    startScreen.style.display =
+        "none";
+
+    modeScreen.style.display =
+        "block";
+}
+
+
+function closeModeScreen() {
+
+    modeScreen.style.display =
+        "none";
+
+    startScreen.style.display =
+        "block";
+}
+
+
 /*
-   click 대신 pointerup을 사용한다.
-   모바일 터치 / 마우스 모두 대응.
+   모드 버튼
 */
 
-function startGame(e) {
+modeButtons.forEach(
+    button => {
 
-    if (e) {
+        button.addEventListener(
+            "pointerup",
+            function(e) {
 
-        e.preventDefault();
-        e.stopPropagation();
+                e.preventDefault();
+
+                e.stopPropagation();
+
+
+                const mode =
+                    button.dataset.mode;
+
+
+                startGame(
+                    mode
+                );
+            }
+        );
     }
+);
 
 
-    if (gameStarted)
+/* =====================================================
+   게임 시작
+===================================================== */
+
+function startGame(mode) {
+
+    if (
+        gameStarted
+    ) {
+
         return;
+    }
 
 
     gameStarted = true;
 
+    gameOver = false;
+
+    gameMode = mode;
+
 
     /*
-       먼저 게임 화면을 표시
+       모드 화면 숨기기
     */
 
-    startScreen.style.display =
+    modeScreen.style.display =
         "none";
+
+
+    /*
+       게임 화면 표시
+    */
 
     gameScreen.style.display =
         "block";
 
 
     /*
-       게임 변수 초기화
+       초기값
     */
 
     stage = 1;
+
+    score = 0;
+
+    timeRemaining = 180;
+
 
     lines = [];
 
@@ -2697,104 +3410,368 @@ function startGame(e) {
 
     slashTrails = [];
 
+
     attacking = false;
 
     dragging = false;
-
-
-    stageText.textContent =
-        "STAGE 1";
-
-
-    /*
-       화면 크기 계산
-    */
-
-    resize();
-
-
-    /*
-       선 제한
-    */
-
-    updateMaxLines();
-
-
-    /*
-       적 생성
-    */
-
-    spawnEnemies();
 
 
     /*
        UI
     */
 
+    stageText.textContent =
+        "STAGE 1";
+
+
+    updateScore();
+
+
+    /*
+       모드별 UI
+    */
+
+    if (
+        gameMode === "score"
+    ) {
+
+        scoreText.style.display =
+            "block";
+
+        timerText.style.display =
+            "none";
+
+    }
+
+    else if (
+        gameMode === "timed"
+    ) {
+
+        scoreText.style.display =
+            "none";
+
+        timerText.style.display =
+            "block";
+
+        updateTimerText();
+
+    }
+
+    else {
+
+        scoreText.style.display =
+            "none";
+
+        timerText.style.display =
+            "none";
+    }
+
+
+    /*
+       화면 크기
+    */
+
+    resize();
+
+
+    /*
+       선 개수
+    */
+
+    updateMaxLines();
+
+
+    /*
+       첫 스테이지 생성
+    */
+
+    spawnEnemies();
+
+
     updateEnemyCount();
 
     updateLineCount();
-
 
     draw();
 
 
     slashButton.disabled =
         false;
+
+
+    /*
+       시간제한 모드 시작
+    */
+
+    if (
+        gameMode === "timed"
+    ) {
+
+        startTimer();
+    }
 }
 
 
-/*
-   pointerup
-*/
+/* =====================================================
+   타이머
+===================================================== */
 
-startButton.addEventListener(
+function startTimer() {
+
+    stopTimer();
+
+
+    timerInterval =
+        setInterval(
+            function() {
+
+                if (
+                    gameOver
+                ) {
+
+                    return;
+                }
+
+
+                timeRemaining--;
+
+
+                updateTimerText();
+
+
+                if (
+                    timeRemaining <= 0
+                ) {
+
+                    timeRemaining = 0;
+
+                    updateTimerText();
+
+                    endGameByTime();
+                }
+
+            },
+            1000
+        );
+}
+
+
+function stopTimer() {
+
+    if (
+        timerInterval !== null
+    ) {
+
+        clearInterval(
+            timerInterval
+        );
+
+        timerInterval = null;
+    }
+}
+
+
+function updateTimerText() {
+
+    const minutes =
+        Math.floor(
+            timeRemaining / 60
+        );
+
+
+    const seconds =
+        timeRemaining % 60;
+
+
+    timerText.textContent =
+
+        `${minutes}:` +
+        `${seconds
+            .toString()
+            .padStart(2, "0")}`;
+}
+
+
+/* =====================================================
+   시간 종료
+===================================================== */
+
+function endGameByTime() {
+
+    if (gameOver)
+        return;
+
+
+    gameOver = true;
+
+
+    attacking = false;
+
+    dragging = false;
+
+
+    stopTimer();
+
+
+    slashButton.disabled =
+        true;
+
+
+    gameOverTitle.textContent =
+        "TIME UP";
+
+
+    gameOverInfo.textContent =
+        `STAGE ${stage}`;
+
+
+    gameOverScreen.style.display =
+        "flex";
+}
+
+
+/* =====================================================
+   다시 시작
+===================================================== */
+
+restartButton.addEventListener(
     "pointerup",
-    startGame,
-    {
-        passive: false
-    }
-);
-
-
-/*
-   일부 오래된 모바일 브라우저 대응
-*/
-
-startButton.addEventListener(
-    "touchend",
     function(e) {
 
         e.preventDefault();
 
-        startGame(e);
-
-    },
-    {
-        passive: false
-    }
-);
+        e.stopPropagation();
 
 
-/*
-   혹시 데스크톱에서 pointer가
-   이상하게 동작하는 경우까지 대응
-*/
+        gameOverScreen.style.display =
+            "none";
 
-startButton.addEventListener(
-    "click",
-    function(e) {
 
-        e.preventDefault();
+        /*
+           현재 선택했던 모드 그대로
+           처음부터 다시 시작
+        */
 
-        startGame(e);
+        gameStarted = false;
 
+
+        stopTimer();
+
+
+        startGame(
+            gameMode
+        );
     }
 );
 
 
 /* =====================================================
-   메뉴 버튼
+   메인 메뉴로
+===================================================== */
+
+menuButton.addEventListener(
+    "pointerup",
+    function(e) {
+
+        e.preventDefault();
+
+        e.stopPropagation();
+
+
+        stopTimer();
+
+
+        gameOverScreen.style.display =
+            "none";
+
+        gameScreen.style.display =
+            "none";
+
+
+        gameStarted = false;
+
+        gameOver = false;
+
+
+        gameMode = null;
+
+
+        startScreen.style.display =
+            "block";
+    }
+);
+
+
+/* =====================================================
+   시작 버튼
+===================================================== */
+
+function openModes(e) {
+
+    if (e) {
+
+        e.preventDefault();
+
+        e.stopPropagation();
+    }
+
+
+    if (
+        modeScreen.style.display ===
+        "block"
+    ) {
+
+        return;
+    }
+
+
+    openModeScreen();
+}
+
+
+startButton.addEventListener(
+    "pointerup",
+    openModes,
+    {
+        passive: false
+    }
+);
+
+
+startButton.addEventListener(
+    "touchend",
+    openModes,
+    {
+        passive: false
+    }
+);
+
+
+startButton.addEventListener(
+    "click",
+    openModes
+);
+
+
+/* =====================================================
+   모드 선택 화면 뒤로가기
+===================================================== */
+
+backToMenu.addEventListener(
+    "pointerup",
+    function(e) {
+
+        e.preventDefault();
+
+        e.stopPropagation();
+
+        closeModeScreen();
+    }
+);
+
+
+/* =====================================================
+   캐릭터 / 설정
 ===================================================== */
 
 characterButton.addEventListener(
@@ -2802,8 +3779,8 @@ characterButton.addEventListener(
     function(e) {
 
         e.preventDefault();
-        e.stopPropagation();
 
+        e.stopPropagation();
     }
 );
 
@@ -2813,14 +3790,14 @@ settingsButton.addEventListener(
     function(e) {
 
         e.preventDefault();
-        e.stopPropagation();
 
+        e.stopPropagation();
     }
 );
 
 
 /* =====================================================
-   화면 초기화
+   창 크기 변경
 ===================================================== */
 
 window.addEventListener(
@@ -2828,6 +3805,7 @@ window.addEventListener(
     function() {
 
         resizeMenuCanvas();
+
 
         if (
             gameStarted
@@ -2839,6 +3817,10 @@ window.addEventListener(
 );
 
 
+/* =====================================================
+   초기화
+===================================================== */
+
 resizeMenuCanvas();
 
 createMenuObjects();
@@ -2848,4 +3830,4 @@ animateMenu();
 </script>
 
 </body>
-</html>
+      </html>
